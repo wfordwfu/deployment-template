@@ -1,0 +1,35 @@
+
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.1",
+    "parameters": {
+        "rgLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "Enter the location to deploy the resource to"
+            },
+            "defaultValue": "eastus"
+        },
+        "rgName": {
+            "type": "string",
+            "metadata": {
+                "description": "Enter the name for the resource group"
+            },
+            "defaultValue": "rg-ctsi"
+        }
+    },
+    
+    "functions": [],
+    "variables": {},
+    "resources": [
+        {
+            "name": "[parameters('rgName')]",
+            "type": "Microsoft.Resources/resourceGroups",
+            "apiVersion": "2018-05-01",
+            "location": "[parameters('rgLocation')]",
+            "dependsOn": [],
+            "tags": {}
+        }
+    ],
+    "outputs": {}
+}

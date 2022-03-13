@@ -1,0 +1,41 @@
+name: Sample Workflow
+
+on:
+  # Allows automated runs when updates pushed to this branch
+  #push:
+  #  branches:
+  #    - main
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+env:
+  location_global: East US
+  subbscription_id: ${{ secrets.AZURE_CREDENTIALS.subscriptionID }}
+
+jobs:
+  sample:
+    name: Sample Jobs
+    runs-on: ubuntu-latest
+    env:
+      resource_group_name: sample-rg
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+
+      - name: Login via Azure CLI
+        uses: Azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy Resource Group ${{ env.resource_group_name }}
+        uses: Azure/arm-deploy@v1
+        id: rgdeploy
+        with:
+          scope: subscription
+          subscriptionID: ${{ env.subscription_id }}
+          region: "${{ env.location_global }}"
+          template: ./arm-templates/resourcegroup.json
+          parameters:
+            rgLocation="${{ env.location_global }}"
+            rgName=${{ env.resource_group_name }}
+          deploymentName: ${{ env.resource_group_name }}

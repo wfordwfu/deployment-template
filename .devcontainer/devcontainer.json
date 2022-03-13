@@ -1,0 +1,101 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.224.2/containers/ubuntu
+{
+	"name": "Ubuntu",
+	"build": {
+		"dockerfile": "Dockerfile",
+        "context": ".",
+		// Update 'VARIANT' to pick an Ubuntu version: hirsute, focal, bionic
+		// Use hirsute or bionic on local arm64/Apple Silicon.
+		"args": { "VARIANT": "focal" }
+	},
+
+	// Set *default* container specific settings.json values on container create.
+	"settings": {
+        "python.pythonPath": "/usr/local/bin/python3",
+        "python.defaultInterpreterPath": "/usr/local/bin/python3",
+        "python.formatting.provider": "black",
+		"python.linting.enabled": true,
+		"python.linting.pylintEnabled": true,
+		"python.linting.pylintPath": "/usr/local/share/pip-global/bin/pylint"
+    },
+
+    //To provide access to local k8s instance
+    "mounts": [
+        "source=/var/run/docker.sock,target=/var/run/docker-host.sock,type=bind",
+        "source=${env:HOME}${env:USERPROFILE}/.kube,target=/root/.kube,type=bind"
+    ],
+    "remoteEnv": {
+        "SYNC_LOCALHOST_KUBECONFIG": "true"
+    },
+
+	// Add the IDs of extensions you want installed when the container is created.
+	"extensions": [
+        "donjayamanne.githistory",
+        "yzhang.markdown-all-in-one",
+        "davidanson.vscode-markdownlint",
+        "piotrpalarz.vscode-gitignore-generator",
+        "oderwat.indent-rainbow",
+        "mutantdino.resourcemonitor",
+        "ms-vscode.azurecli",
+        "ms-kubernetes-tools.vscode-kubernetes-tools",
+        "ms-vscode.powershell",
+        "ms-toolsai.jupyter",
+        "ms-python.python",
+        "matklad.rust-analyzer"
+    ],
+
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	"postStartCommand": "bash .devcontainer/postStartCommand.sh",
+    "postCreateCommand": "bash .devcontainer/postCreateCommand.sh",
+
+	// Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
+	//"remoteUser": "vscode",
+
+    // Features provided by VS Code that are being installed.  
+    // More info: https://github.com/microsoft/vscode-dev-containers/tree/main/script-library/container-features.
+	"features": {
+        "common": {
+            //https://github.com/microsoft/vscode-dev-containers/blob/main/script-library/docs/common.md
+            "username": "automatic",
+            "uid": "automatic",
+            "gid": "automatic",
+            "installZsh": true,
+            "installOhMyZsh": true,
+            "upgradePackages": true,
+            "nonFreePackages": false
+        },
+        "git": {
+            //https://github.com/microsoft/vscode-dev-containers/blob/main/script-library/docs/git-from-src.md
+            "version": "latest",
+            "ppa": true
+        },
+		"kubectl-helm-minikube": {
+            "version": "latest",
+            "helm": "latest",
+            "minikube": "none"
+        },
+		"terraform": {
+            //https://github.com/microsoft/vscode-dev-containers/blob/main/script-library/docs/terraform.md
+            "version":"latest",
+            "tflint": "latest",
+            "terragrunt": "latest"
+        },
+		"github-cli": "latest",
+		"azure-cli": "latest",
+        "aws-cli": "latest",
+		"python": {
+            //https://github.com/microsoft/vscode-dev-containers/blob/main/script-library/docs/python.md
+            "version": "3.10"
+        },
+		"rust": {
+            //https://github.com/microsoft/vscode-dev-containers/blob/main/script-library/docs/rust.md
+            "version":"latest",
+            "profile":"default"
+        },
+	},
+    "runArgs": ["--init"]
+}
