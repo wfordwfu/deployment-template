@@ -12,12 +12,15 @@
 
 	// Set *default* container specific settings.json values on container create.
 	"settings": {
+        "python.disableInstallationCheck": true,
         "python.pythonPath": "/usr/local/bin/python3",
         "python.defaultInterpreterPath": "/usr/local/bin/python3",
         "python.formatting.provider": "black",
 		"python.linting.enabled": true,
 		"python.linting.pylintEnabled": true,
-		"python.linting.pylintPath": "/usr/local/share/pip-global/bin/pylint"
+		"python.linting.pylintPath": "/usr/local/share/pip-global/bin/pylint",
+        "go.useLanguageServer": true,
+        "rust-analyzer.checkOnSave.command": "clippy"
     },
 
     //To provide access to local k8s instance
@@ -39,10 +42,11 @@
         "mutantdino.resourcemonitor",
         "ms-vscode.azurecli",
         "ms-kubernetes-tools.vscode-kubernetes-tools",
-        "ms-vscode.powershell",
+ //       "ms-vscode.powershell",
         "ms-toolsai.jupyter",
         "ms-python.python",
-        "matklad.rust-analyzer"
+        "matklad.rust-analyzer",
+        "golang.Go"
     ],
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
@@ -73,7 +77,12 @@
             "version": "latest",
             "ppa": true
         },
+        "golang":{
+            //https://github.com/microsoft/vscode-dev-containers/blob/main/script-library/docs/go.md
+            "version": "latest"
+        },
 		"kubectl-helm-minikube": {
+            //https://github.com/microsoft/vscode-dev-containers/blob/main/script-library/docs/kubectl-helm.md
             "version": "latest",
             "helm": "latest",
             "minikube": "none"
@@ -84,9 +93,15 @@
             "tflint": "latest",
             "terragrunt": "latest"
         },
-		"github-cli": "latest",
-		"azure-cli": "latest",
-        "aws-cli": "latest",
+		"github-cli": {
+            //https://github.com/microsoft/vscode-dev-containers/blob/main/script-library/docs/github-cli.md
+            "version":"latest"
+        },
+		"azure-cli":  {
+            //https://github.com/microsoft/vscode-dev-containers/blob/main/script-library/docs/azcli.md
+            "version":"latest"
+        },
+//        "aws-cli": "latest",
 		"python": {
             //https://github.com/microsoft/vscode-dev-containers/blob/main/script-library/docs/python.md
             "version": "3.10"

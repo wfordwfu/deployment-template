@@ -5,9 +5,14 @@ ARG VARIANT="hirsute"
 FROM mcr.microsoft.com/vscode/devcontainers/base:0-${VARIANT}
 
 # [Optional] Uncomment this section to install additional OS packages.
-RUN apt-get update && apt-get upgrade -y \
-    && export DEBIAN_FRONTEND=noninteractive \
-    && apt-get -y install --no-install-recommends xdg-utils
+RUN apt-get update && apt-get upgrade -y && \
+    export DEBIAN_FRONTEND=noninteractive && \
+    apt-get -y install --no-install-recommends xdg-utils python3-pip
 
-COPY library-scripts/argo-cd.sh /tmp/library-scripts/
+COPY library-scripts/* /tmp/library-scripts/
 RUN bash /tmp/library-scripts/argo-cd.sh
+RUN bash /tmp/library-scripts/kubectl-krew.sh
+
+COPY requirements.txt /tmp/pip-tmp/
+RUN pip3 --disable-pip-version-check --no-cache-dir install -r /tmp/pip-tmp/requirements.txt && \
+    rm -rf /tmp/pip-tmp

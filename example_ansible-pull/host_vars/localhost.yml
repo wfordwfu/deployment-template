@@ -1,0 +1,4 @@
+---
+# Configs
+    branch: main
+    ansible_cron_minute: "*/15"

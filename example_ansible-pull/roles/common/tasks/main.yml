@@ -1,0 +1,7 @@
+---
+  - name: Test roles
+    ansible.builtin.debug:
+      msg: "The common role was successful!"
+
+#  - name: Disable Root over ssh
+#    include: noremoteroot.yml

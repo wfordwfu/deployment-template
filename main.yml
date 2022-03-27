@@ -1,0 +1,13 @@
+---
+- hosts: localhost
+  gather_facts: false
+
+  tasks:
+    - name: Get nodes
+      command: kubectl get nodes
+      register: current_nodes
+      changed_when: false
+    
+    - name: Print noodes
+      debug:
+        msg: "{{ current_nodes.stdout }}"

@@ -10,3 +10,4 @@ $HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions
 #$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
 
 sed -i.bak 's/\(^plugins=([^)]*\)/\1 git kubectl minikube zsh-autosuggestions helm/' $HOME/.zshrc
+echo '''export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"''' >> $HOME/.zshrc

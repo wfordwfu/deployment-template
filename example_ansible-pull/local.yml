@@ -1,0 +1,7 @@
+---
+- hosts: localhost
+  connection: local
+  become: true
+
+  pre_tasks:
+    - include_vars: "hosts/{{ lookup('env', 'HOSTNAME') }}.yml"

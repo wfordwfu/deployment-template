@@ -1,0 +1,19 @@
+---
+- name: create ansible user
+  user:
+    name: ansible
+    uid: 900
+    shell: /bin/false
+#    home: /home/ansible
+    create_home: yes
+    system: true
+    state: present
+
+- name: copy sudoers_ansible
+  copy:
+    src: files/sudoers_ansible
+    dest: /etc/sudoers.d/ansible
+    owner: root
+    group: root
+    mode: 0440
+    validate: 'visudo -cf %s'
