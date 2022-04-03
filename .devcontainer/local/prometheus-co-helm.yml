@@ -1,0 +1,22 @@
+---
+  - name: Add Prometheus Community repository
+    kubernetes.core.helm_repository:
+      name: prometheus-community
+      repo_url: https://prometheus-community.github.io/helm-charts
+
+  - name: Helm Repo Update
+    command: helm repo update
+    changed_when: false
+
+  - name: Create Monitoring namespace
+    kubernetes.core.k8s:
+      name: monitoring
+      api_version: v1
+      kind: Namespace
+      state: present
+
+  - name: Install prometheus stack chart
+    kubernetes.core.helm:
+        name: prometheus
+        namespace: monitoring
+        chart_ref: prometheus-community/kube-prometheus-stack

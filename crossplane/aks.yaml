@@ -1,0 +1,19 @@
+---
+apiVersion: azure.crossplane.io/v1beta1
+kind: ProviderConfig
+metadata:
+  name: default
+spec:
+  credentials:
+    source: Secret
+    secretRef:
+      namespace: crossplane-system
+      name: azure-creds
+      key: creds
+---
+apiVersion: azure.crossplane.io/v1beta1
+kind: ResourceGroup
+metadata:
+  name: crossplane-rg
+spec:
+  location: eastus

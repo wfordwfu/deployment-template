@@ -1,0 +1,22 @@
+---
+  - name: Add Grafana repository
+    kubernetes.core.helm_repository:
+      name: grafana
+      repo_url: https://grafana.github.io/helm-charts
+
+  - name: Helm Repo Update
+    command: helm repo update
+    changed_when: false
+
+  - name: Create Monitoring namespace
+    kubernetes.core.k8s:
+      name: monitoring
+      api_version: v1
+      kind: Namespace
+      state: present
+
+  - name: Install Crossplane chart
+    kubernetes.core.helm:
+        name: loki
+        namespace: monitoring
+        chart_ref: grafana/loki-stack

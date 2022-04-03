@@ -1,0 +1,22 @@
+---
+  - name: Add Harbor repository
+    kubernetes.core.helm_repository:
+      name: harbor
+      repo_url: https://helm.goharbor.io
+
+  - name: Helm Repo Update
+    command: helm repo update
+    changed_when: false
+
+  - name: Create Harbor namespace
+    kubernetes.core.k8s:
+      name: harbor
+      api_version: v1
+      kind: Namespace
+      state: present
+
+  - name: Deploy Harbor chart
+    kubernetes.core.helm:
+        name: harbor
+        namespace: harbor
+        chart_ref: harbor/harbor

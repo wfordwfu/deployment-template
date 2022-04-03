@@ -236,3 +236,4 @@ terraform.rc
 
 /temp/*
 .terraform.lock.hcl
+creds.json
