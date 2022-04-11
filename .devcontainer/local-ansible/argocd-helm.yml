@@ -20,3 +20,11 @@
         name: argocd-server
         namespace: argocd
         chart_ref: argo/argo-cd
+#        values_files: 
+#          - local-ansible/helm/argo/values.yaml
+
+#  - name: Apply IngressRoute for ArgoCD
+#    k8s:
+#      definition: "{{ lookup('template', '{{ item }}') | from_yaml }}"
+#    with_fileglob:
+#      - "k8s/argo/*.yaml"

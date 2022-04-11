@@ -1,6 +1,6 @@
 ---
 title: Deployment Project Template
-last revised: 2022/04/03
+last revised: 2022/04/10
 ---
 
 Note: Many of the examples are stubs or not yet functions.
@@ -19,7 +19,27 @@ NOTE: Currently there's a bug in WSL2 that affects devcontainers.  Terraform is 
 
 Currently the dev environment (debian) installs several languages (Go, Rust, Python), several cli tools (kubectl, helm, argo, crossplane, github, azure, aws, k9s), and some useful tools in general (git, ansible, terraform).  In addition, Ansible via Helm is used to deploy ArgoCD and Crossplane to the local cluster.
 
+- To access argocd UI:
+  - `open http://argocd.127.0.0.1.nip.io`
+  - Username is admin
+  - Password is `kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo`
+- To access traefik dashboard:
+  - `open http://traefik.127.0.0.1.nip.io/dashboard/`
+
+## Issues
+
+- expose Argo UI through traefik
+- fix nfs role "(0x425)\nexportfs: /opt/temp does not support NFS export)"
+- apt install kubectx not found
+- Getting Rancher Running
+  - cert-manager-webhook has to be forwarded in order to install rancher.
+  - docker logs 33691a6be011 2>&1 | grep "Bootstrap Password:" run in wsl- look for last rancher/rancher containerid
+
 ## Notes
+
+### Useful commands
+
+- `helm show values traefik/traefik > temp/traefik-values.yaml`
 
 ### Multiple kubectx
 
@@ -28,15 +48,28 @@ export KUBECONFIG=~/.kube/config:~/someotherconfig
 kubectl config view --flatten
 ```
 
+### [dynamic nfs provisioning](https://www.youtube.com/watch?v=DF3v2P8ENEg)
+
+- https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner
+- https://phoenixnap.com/kb/nfs-docker-volumes
+- https://github.com/justmeandopensource/kubernetes
+
+in traefik/values.yaml
+
+```yaml
+persistence:
+  enabled: true
+```
+
 ### [ARGOCD](https://argo-cd.readthedocs.io/en/stable/getting_started/)
+
+#### https://argo-cd.readthedocs.io/en/stable/operator-manual/ingress/#traefik-v22
+
+helm upgrade --install argocd argo/argo-cd --namespace argocd --set server.ingress.hosts="{argocd.$INGRESS_HOST.nip.io}" --wait
 
 kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "LoadBalancer"}}'
 
-kubectl port-forward svc/argocd-server -n argocd 8080:443
-
-kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo
-
-Go into Rancher Desktop / Port Forwarding
+Go into Rancher Desktop / Port Forwarding ?
 
 ## Reference
 

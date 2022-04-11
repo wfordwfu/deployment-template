@@ -5,6 +5,8 @@ git clone \
 https://github.com/zsh-users/zsh-autosuggestions \
 $HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions
 
+helm plugin install https://github.com/databus23/helm-diff
+
 #git clone \
 #git clone https://github.com/zsh-users/zsh-syntax-highlighting.git \
 #$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting

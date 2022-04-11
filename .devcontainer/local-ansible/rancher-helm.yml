@@ -1,0 +1,26 @@
+---
+  - name: Add Rancher repository
+    kubernetes.core.helm_repository:
+      name: rancher-latest
+      repo_url: https://releases.rancher.com/server-charts/latest
+
+  - name: Helm Repo Update
+    command: helm repo update
+    changed_when: false
+  
+  - name: Create cattle-system namespace
+    kubernetes.core.k8s:
+      name: cattle-system
+      api_version: v1
+      kind: Namespace
+      state: present
+
+  - name: Deploy rancher chart
+    kubernetes.core.helm:
+        name: rancher
+        namespace: cattle-system
+        chart_ref: rancher-latest/rancher
+        wait: true
+        wait_timeout: 10m
+        values:
+          hostname: rancher.rd.localhost

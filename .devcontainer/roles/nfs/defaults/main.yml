@@ -1,0 +1,5 @@
+---
+nfs_exports: [ "/opt/temp *(rw,sync,no_subtree_check,no_root_squash,no_all_squash,insecure)" ]
+
+nfs_rpcbind_state: started
+nfs_rpcbind_enabled: true

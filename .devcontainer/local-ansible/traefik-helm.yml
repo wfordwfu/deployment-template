@@ -1,0 +1,25 @@
+---
+  - name: Add Traefik repository
+    kubernetes.core.helm_repository:
+      name: traefik
+      repo_url: https://helm.traefik.io/traefik
+
+  - name: Helm Repo Update
+    command: helm repo update
+    changed_when: false
+
+  - name: Deploy traefik chart
+    kubernetes.core.helm:
+        name: traefik
+        namespace: kube-system
+        chart_ref: traefik/traefik
+        wait: true
+        wait_timeout: 5m
+        values_files: 
+          - local-ansible/helm/traefik/values.yaml
+
+  - name: Apply IngressRoute for Traefik Dashboard
+    k8s:
+      definition: "{{ lookup('template', '{{ item }}') | from_yaml }}"
+    with_fileglob:
+      - "k8s/traefik/*.yaml"

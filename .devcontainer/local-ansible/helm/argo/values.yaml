@@ -1,0 +1,8 @@
+server:
+  ingress:
+    enabled: true
+    hosts:
+      - argocd.127.0.0.1.nip.io
+  extraArgs:
+  - --insecure
+#installCRDs: false

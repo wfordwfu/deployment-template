@@ -235,5 +235,6 @@ terraform.rc
 # End of https://www.toptal.com/developers/gitignore/api/python,visualstudiocode,rust,terraform,helm
 
 /temp/*
+/ext-ref/*
 .terraform.lock.hcl
 creds.json
