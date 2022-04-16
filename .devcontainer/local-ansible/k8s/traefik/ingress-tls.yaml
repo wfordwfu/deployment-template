@@ -1,0 +1,27 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: traefik-dashboard-secure
+  namespace: kube-system
+spec:
+  entryPoints:
+  - websecure
+  routes:
+  - kind: Rule
+    match: Host("dashboard.traefik.127.0.0.1.sslip.io")
+    services:
+      - name: api@internal
+        kind: TraefikService
+    middlewares:
+  #  - name: dashboard-auth
+    - name: dashboard-rewrite
+  - kind: Rule
+    match: Host("dashboard.traefik.127.0.0.1.sslip.io") && PathPrefix("/api")
+    services:
+      - name: api@internal
+        kind: TraefikService
+    middlewares:
+#    - name: dashboard-auth
+  tls:
+    secretName: traefik-dashboard-crt

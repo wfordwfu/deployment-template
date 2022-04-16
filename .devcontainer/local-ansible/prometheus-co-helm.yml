@@ -15,8 +15,8 @@
       kind: Namespace
       state: present
 
-  - name: Install prometheus stack chart
-    kubernetes.core.helm:
-        name: prometheus
-        namespace: monitoring
-        chart_ref: prometheus-community/kube-prometheus-stack
+#  - name: Install prometheus stack chart
+#    kubernetes.core.helm:
+#        name: prometheus
+#        namespace: monitoring
+#        chart_ref: prometheus-community/kube-prometheus-stack

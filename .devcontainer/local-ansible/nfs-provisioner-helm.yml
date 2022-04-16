@@ -1,0 +1,24 @@
+---
+  - name: Add nfs-provisioner repository
+    kubernetes.core.helm_repository:
+      name: nfs-subdir-external-provisioner
+      repo_url: https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/
+
+  - name: Helm Repo Update
+    command: helm repo update
+    changed_when: false
+
+  - name: Create storage namespace
+    kubernetes.core.k8s:
+      name: storage
+      api_version: v1
+      kind: Namespace
+      state: present
+
+  - name: Deploy Argo chart
+    kubernetes.core.helm:
+        name: nfs-subdir-external-provisioner
+        namespace: storage
+        chart_ref: nfs-subdir-external-provisioner/nfs-subdir-external-provisioner
+        values_files: 
+          - local-ansible/helm/nfs-provisioner/values.yaml

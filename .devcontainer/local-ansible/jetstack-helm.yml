@@ -20,6 +20,12 @@
         name: cert-manager
         namespace: cert-manager
         chart_ref: jetstack/cert-manager
-        chart_version: v1.1.0
+        chart_version: v1.8.0
         values:
           installCRDs: true
+      
+  - name: Apply Yaml for cert-manager
+    kubernetes.core.k8s:
+      definition: "{{ lookup('template', '{{ item }}') | from_yaml }}"
+    with_fileglob:
+      - "k8s/cert-manager/*.yaml"

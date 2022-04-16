@@ -15,7 +15,7 @@
       kind: Namespace
       state: present
 
-  - name: Install Crossplane chart
+  - name: Install Loki chart
     kubernetes.core.helm:
         name: loki
         namespace: monitoring

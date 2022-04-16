@@ -1,14 +1,17 @@
+---
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: traefik
+  name: traefik-dashboard-http
   namespace: kube-system
 spec:
   entryPoints:
-    - web
+  - web
   routes:
-    - match: Host(`traefik.127.0.0.1.nip.io`) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))
-      kind: Rule
-      services:
-        - name: api@internal
-          kind: TraefikService
+  - kind: Rule
+    match: Host("dashboard.traefik.127.0.0.1.sslip.io")
+    services:
+    - name: api@internal
+      kind: TraefikService
+    middlewares:
+    - name: redirect-permanent

@@ -20,3 +20,5 @@
         name: crossplane
         namespace: crossplane-system
         chart_ref: crossplane-stable/crossplane
+        values_files: 
+          - local-ansible/helm/crossplane/values.yaml

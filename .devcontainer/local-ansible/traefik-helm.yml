@@ -18,7 +18,7 @@
         values_files: 
           - local-ansible/helm/traefik/values.yaml
 
-  - name: Apply IngressRoute for Traefik Dashboard
+  - name: Apply Yaml for Traefik Dashboard
     k8s:
       definition: "{{ lookup('template', '{{ item }}') | from_yaml }}"
     with_fileglob:

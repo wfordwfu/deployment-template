@@ -1,8 +1,6 @@
 ---
 - hosts: localhost
   gather_facts: true
-  #roles:
-  #  - nfs
 
   tasks:
     - name: Get nodes
@@ -14,20 +12,20 @@
       debug:
         msg: "{{ current_nodes.stdout }}"
 
-    - name: Update traefik
-      import_tasks: local-ansible/traefik-helm.yml
+    - name: include cert-manager
+      import_tasks: local-ansible/jetstack-helm.yml
 
-    - name: include Crossplane
-      import_tasks: local-ansible/crossplane-helm.yml
+    - name: include traefik
+      import_tasks: local-ansible/traefik-helm.yml
 
     - name: include Argo CD
       import_tasks: local-ansible/argocd-helm.yml
 
-    - name: include Bitnami
-      import_tasks: local-ansible/bitnami-helm.yml
+    - name: include Crossplane
+      import_tasks: local-ansible/crossplane-helm.yml
 
-    - name: include cert-manager
-      import_tasks: local-ansible/jetstack-helm.yml
+#    - name: include Prometheus
+#      import_tasks: local-ansible/prometheus-co-helm.yml
 
-#    - name: include rancher
-#      import_tasks: local-ansible/rancher-helm.yml
+#    - name: include Bitnami
+#      import_tasks: local-ansible/bitnami-helm.yml
