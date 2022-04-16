@@ -24,8 +24,11 @@
     - name: include Crossplane
       import_tasks: local-ansible/crossplane-helm.yml
 
-#    - name: include Prometheus
-#      import_tasks: local-ansible/prometheus-co-helm.yml
+    - name: include Airflow
+      import_tasks: local-ansible/airflow-helm.yml
+
+#    - name: include Loki
+#      import_tasks: local-ansible/loki-helm.yml
 
 #    - name: include Bitnami
 #      import_tasks: local-ansible/bitnami-helm.yml

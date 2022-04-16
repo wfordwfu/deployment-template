@@ -1,0 +1,14 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: airflow-dashboard
+  namespace: airflow
+spec:
+  dnsNames:
+  - 'airflow.127.0.0.1.sslip.io'
+
+  issuerRef:
+    kind: ClusterIssuer
+    name: selfsigned
+  secretName: airflow-crt

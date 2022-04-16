@@ -1,0 +1,17 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: airflow-server
+  namespace: airflow
+spec:
+  entryPoints:
+  - web
+  routes:
+  - kind: Rule
+    match: Host("airflow.127.0.0.1.sslip.io")
+    services:
+    - name: airflow-webserver
+      port: 8080
+    middlewares:
+    - name: redirect-permanent

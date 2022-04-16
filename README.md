@@ -25,6 +25,10 @@ Currently the dev environment (debian) installs several languages (Go, Rust, Pyt
   - `open http://argocd.127.0.0.1.sslip.io`
   - Username is admin
   - Password is `kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo`
+- To access airflow UI:
+  - `open http://airflow.127.0.0.1.sslip.io`
+  - Username is admin
+  - Password is admin
 
 ## Getting Started
 
@@ -129,6 +133,7 @@ persistence:
 - [cert-manager](https://cert-manager.io/docs/)
 - [Traefik proxy](https://doc.traefik.io/traefik/)
 - [Argo CD](https://argoproj.github.io/cd)
+- [Argo CD docs](https://argo-cd.readthedocs.io/en/stable/)
 - [Argo CD Cli](https://argo-cd.readthedocs.io/en/stable/cli_installation/)
 - [Kubectl Krew plugin manager](https://krew.sigs.k8s.io/docs/user-guide/quickstart/)
 - [Krew plugins list](https://krew.sigs.k8s.io/plugins/)
@@ -143,6 +148,7 @@ persistence:
 
 - [Crossplane](https://crossplane.io/docs/v1.7/reference/install.html)
 - [Argo CD](https://github.com/argoproj/argo-helm/tree/master/charts/argo-cd)
+- [Airflow](https://airflow.apache.org/docs/helm-chart/stable/index.html)
 - [Loki](https://grafana.com/docs/loki/latest/installation/helm/)
 - [Harbor](https://goharbor.io/docs/2.4.0/install-config/harbor-ha-helm/)
 
