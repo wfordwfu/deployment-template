@@ -15,15 +15,15 @@ FROM mcr.microsoft.com/vscode/devcontainers/base:${VARIANT}
 # [Optional] Uncomment this section to install additional OS packages.
 RUN apt-get update && apt-get upgrade -y && \
     export DEBIAN_FRONTEND=noninteractive && \
-    apt-get -y install --no-install-recommends xdg-utils python3-pip
+    apt-get -y install --no-install-recommends xdg-utils python3-pip open-iscsi apt-transport-https ca-certificates gnupg
 
 COPY --from=buildk9s /k9s/execs/k9s /usr/local/bin/k9s
 
 COPY library-scripts/* /tmp/library-scripts/
-RUN bash /tmp/library-scripts/argo-cd-cli.sh
-RUN bash /tmp/library-scripts/crossplane-cli.sh
-RUN bash /tmp/library-scripts/kubectl-krew.sh
+RUN bash -c 'set -e; for f in /tmp/library-scripts/*.sh; do bash "$f"; done'
 
 COPY requirements.txt /tmp/pip-tmp/
 RUN pip3 --disable-pip-version-check --no-cache-dir install -r /tmp/pip-tmp/requirements.txt && \
-    rm -rf /tmp/pip-tmp
+    rm -rf /tmp/pip-tmp && \
+    apt-get clean -y && \
+    rm -rf /var/lib/apt/lists/* /tmp/library-scripts
