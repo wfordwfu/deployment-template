@@ -1,11 +1,11 @@
 ---
 title: Deployment Project Template
-last revised: 2022/04/16
+last revised: 2022/07/31
 ---
 
 Project in development
 
-This is just a learning/demonstration of several different tools in the DevOps/GitOps space.  My ultimate goal is to have a unified environment running tools locally to develop in a kubernetes environment, but to also quickly deploy a "production" ready application.  In my case, I'm probably going to target a single vm running K3s/K3OS for flexibility/cost reasons.
+This is just a learning/demonstration of several different tools in the DevOps/GitOps space.  My ultimate goal is to have a unified environment running tools locally to develop in a kubernetes environment, but to also quickly deploy a "production" ready environment and application on prem or cloud.
 
 The goal is to create a solution where this can be accessed via [Visual Studio Code](https://code.visualstudio.com/) and the [Remote-Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension.
 
@@ -17,18 +17,17 @@ NOTE: Currently there's a bug in WSL2 that affects devcontainers.  Terraform is 
 
 ## Features
 
-Currently the dev environment (debian) installs several languages (Go, Rust, Python), several cli tools (kubectl, helm, argo, crossplane, github, azure, aws, k9s), and some useful tools in general (git, ansible, terraform).  In addition, Ansible via Helm is used to deploy ArgoCD and Crossplane to the local cluster.
+Currently the dev environment (debian) installs several languages (Go, Rust, Python), several cli tools (kubectl, helm, argo, crossplane, github, gcloud, azure, aws, k9s), and some useful tools in general (git, ansible, terraform).  Several tools are deployed locally to make the development experience as close to what dev/stage/prod would be like.
 
-- To access traefik dashboard:
-  - `open http://dashboard.traefik.127.0.0.1.sslip.io`
-- To access argocd UI:
-  - `open http://argocd.127.0.0.1.sslip.io`
+- To access [traefik dashboard](http://dashboard.traefik.127.0.0.1.sslip.io)
+- To access [argocd UI](http://argocd.127.0.0.1.sslip.io):
   - Username is admin
   - Password is `kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo`
-- To access airflow UI:
-  - `open http://airflow.127.0.0.1.sslip.io`
+- To access [airflow UI](http://airflow.127.0.0.1.sslip.io):
   - Username is admin
   - Password is admin
+- To access [longhorn UI](http://longhorn.127.0.0.1.sslip.io):
+  - TODO
 
 ## Getting Started
 
@@ -38,24 +37,10 @@ Currently the dev environment (debian) installs several languages (Go, Rust, Pyt
 
 ## Issues/future enhancements
 
-- apt install kubectx not found
-- Configure NFS Server ?
-  - sudo apt-get install rpcbind nfs-kernel-server nfs-common
-  - echo "/nfsshare *(rw,sync,no_subtree_check,no_root_squash,no_all_squash,insecure)" | sudo tee -a /etc/exports
-  - sudo mkdir -p /run/sendsigs.omit.d/
-  - sudo mkdir -p /nfsshare
-  - sudo chown nobody:nogroup /nfsshare
-  - sudo chmod 777 /nfsshare
-  - sudo service rpcbind restart
-  - sudo service nfs-kernel-server restart
-  - sudo exportfs -rav
-  - ip a | grep eth0
-
-```bash
-ip a | grep eth0
-6: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq state UP group default qlen 1000
-    inet 192.168.51.164/20 brd 192.168.63.255 scope global eth0
-```
+- Build out Longhorn logic
+- Add MetalLB
+- Add Kubeflow
+- Add Prometheus/Grafana
 
 ## Notes
 
@@ -100,7 +85,7 @@ export KUBECONFIG=~/.kube/config:~/someotherconfig
 kubectl config view --flatten
 ```
 
-### [dynamic nfs provisioning](https://www.youtube.com/watch?v=DF3v2P8ENEg)
+### [dynamic nfs provisioning](https://www.youtube.com/watch?v=DF3v2P8ENEg) - Expect to replace with Longhorn
 
 - `open https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner`
 - `open https://phoenixnap.com/kb/nfs-docker-volumes`
@@ -143,6 +128,7 @@ persistence:
 - [Argo Workflows?](https://argoproj.github.io/argo-workflows)
 - [Loki in grafana](http://docs.grafana.org/features/datasources/loki/)
 - [Ansible k8s Object](https://docs.ansible.com/ansible/latest/collections/kubernetes/core/k8s_module.html#ansible-collections-kubernetes-core-k8s-module)
+- [Longhorn](https://longhorn.io/docs/latest/)
 
 ### Helm Charts
 
