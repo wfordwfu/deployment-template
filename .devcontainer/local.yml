@@ -18,11 +18,14 @@
     - name: include traefik
       import_tasks: local-ansible/traefik-helm.yml
 
+    - name: include Longhorn
+      import_tasks: local-ansible/longhorn-helm.yml
+
     - name: include Argo CD
       import_tasks: local-ansible/argocd-helm.yml
 
-    - name: include Crossplane
-      import_tasks: local-ansible/crossplane-helm.yml
+#    - name: include Crossplane
+#      import_tasks: local-ansible/crossplane-helm.yml
 
     - name: include Airflow
       import_tasks: local-ansible/airflow-helm.yml

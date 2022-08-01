@@ -22,3 +22,14 @@
         chart_ref: crossplane-stable/crossplane
         values_files: 
           - local-ansible/helm/crossplane/values.yaml
+
+  - name: Fetch Crossplane cli
+    ansible.builtin.uri:
+      url: https://raw.githubusercontent.com/crossplane/crossplane/master/install.sh
+      return_content: yes
+    register: crossplane_cli_installer
+
+  - name: Run Crossplane cli installer
+    ansible.builtin.shell:
+      cmd: sh
+      stdin: "{{ crossplane_cli_installer.content }}"

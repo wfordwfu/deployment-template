@@ -1,0 +1,14 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: longhorn-dashboard
+  namespace: longhorn-system
+spec:
+  dnsNames:
+  - 'longhorn.127.0.0.1.sslip.io'
+
+  issuerRef:
+    kind: ClusterIssuer
+    name: selfsigned
+  secretName: longhorn-crt
