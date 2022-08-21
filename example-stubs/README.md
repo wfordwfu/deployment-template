@@ -1,0 +1,1 @@
+This directory contains some initial code around various solutions I've explored before.  The Ansible Pull example is probably the most well developed.  Revisit later.

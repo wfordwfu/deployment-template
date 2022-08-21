@@ -1,0 +1,90 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: true
+
+  pre_tasks:
+    #- include_vars: "ansible/vars/{{ lookup('env', 'HOSTNAME') }}.yml"
+    - include_vars: "vars/localhost.yml"
+  
+  tasks:
+    - name: implement helm role
+      include_role:
+        name: helm
+      when: roles.helm == true
+
+    - name: implement git role
+      include_role:
+        name: git
+      when: roles.git == true
+
+    - name: Get nodes
+      command: kubectl get nodes
+      register: current_nodes
+      changed_when: false
+
+    - name: Print nodes
+      debug:
+        msg: "{{ current_nodes.stdout }}"
+
+    - name: Install kubernetes module
+      ansible.builtin.pip:
+        name: kubernetes
+
+
+
+    - name: Install Helm Diff Plugin
+      kubernetes.core.helm_plugin:
+        plugin_path: https://github.com/databus23/helm-diff
+        state: present
+
+# should be here, but just in case.  You'll need 
+#    - name: Create a directory if it does not exist
+#      become: yes
+#      ansible.builtin.file:
+#        path: /tmp
+#        state: directory
+#        mode: '0777'
+
+    - name: Download Rancher Local Path Storage Manifest
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/rancher/local-path-provisioner/v0.0.22/deploy/local-path-storage.yaml
+        dest: /tmp/local-path-storage.yaml
+        mode: '0664'
+
+    - name: Apply Rancher Local Path Storage Manifest
+      kubernetes.core.k8s:
+        state: present
+        src: /tmp/local-path-storage.yaml
+
+    - name: Clean up Rancher Local Path Storage Manifest
+      ansible.builtin.file:
+        path: /tmp/local-path-storage.yaml
+        state: absent
+
+    - name: include jetstack-helm
+      import_tasks: include/jetstack-helm.yml
+
+    - name: include cert-manager
+      import_tasks: include/cert-manager-jetstack.yml
+
+    - name: include traefik
+      import_tasks: include/traefik-helm.yml
+
+    - name: include Argo CD
+      import_tasks: include/argocd-helm.yml
+      when: applications.argocd == true
+
+    - name: include kube-prometheus-stack
+      import_tasks: include/kube-prometheus-helm.yml
+      when: applications.monitoring == true
+
+    - name: include Airflow
+      import_tasks: include/airflow-helm.yml
+      when: applications.airflow == true
+
+#    - name: include Kubernetes Dashboard
+#      import_tasks: ansible/kubernetes-dashboard-helm.yml
+
+#    - name: include Longhorn
+#      import_tasks: ansible/longhorn-helm.yml

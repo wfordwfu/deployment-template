@@ -1,0 +1,23 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: moonitoring-server
+  namespace: monitoring
+spec:
+  entryPoints:
+  - web
+  routes:
+  - kind: Rule
+    match: Host("dashboard.grafana.127.0.0.1.sslip.io")
+    services:
+    - name: grafana
+      port: 80
+      sticky:
+        cookie:
+          httpOnly: true
+          name: grafana
+          secure: true
+          sameSite: none
+    middlewares:
+    - name: redirect-permanent

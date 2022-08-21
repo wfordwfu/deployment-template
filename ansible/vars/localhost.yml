@@ -1,0 +1,15 @@
+---
+# Configs
+    ansible_python_interpreter: /usr/bin/env python3
+    branch: main
+    ansible_cron_minute: "*/15"
+#    ssl_ca_cert: /etc/ssl/certs/ca-certificates.crt
+
+    roles:
+      git: false
+      helm: true
+    
+    applications:
+      airflow: false
+      argocd: true
+      monitoring: true

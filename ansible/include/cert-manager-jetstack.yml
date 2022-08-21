@@ -1,0 +1,24 @@
+---
+  - name: Create cert-manager namespace
+    kubernetes.core.k8s:
+      name: cert-manager
+      api_version: v1
+      kind: Namespace
+      state: present
+
+  - name: Deploy cert-manager chart
+    kubernetes.core.helm:
+        name: cert-manager
+        namespace: cert-manager
+        atomic: yes
+        chart_ref: jetstack/cert-manager
+        chart_version: v1.9.1
+        values:
+#          startupapicheck.timeout: 5m
+          installCRDs: true
+      
+  - name: Apply Yaml for cert-manager
+    kubernetes.core.k8s:
+      definition: "{{ lookup('template', '{{ item }}') | from_yaml }}"
+    with_fileglob:
+      - "k8s/cert-manager/*.yaml"

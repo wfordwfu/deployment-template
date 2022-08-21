@@ -1,0 +1,14 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: monitoring-dashboard
+  namespace: monitoring
+spec:
+  dnsNames:
+  - 'dashboard.grafana.127.0.0.1.sslip.io'
+
+  issuerRef:
+    kind: ClusterIssuer
+    name: selfsigned
+  secretName: monitoring-crt

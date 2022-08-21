@@ -1,0 +1,26 @@
+---
+- name: Required to get Ansible working
+  hosts: all
+  become: true
+  pre_tasks:
+  - name: check for python3
+    raw: test -e /usr/bin/python3
+    changed_when: false
+    failed_when: false
+    register: check_python
+
+  - name: Install python3
+    raw: test -e /usr/bin/apt && (apt -y update && apt install -y python3) | (yum -y install python36)
+    when: check_python.rc != 0
+
+- name: Install basic packages
+  hosts: all
+  become: true
+  tasks:
+   - name: install pip
+     package:
+       name: python3-pip
+       state: present
+   - name: install Ansible
+     pip:
+       name: ansible

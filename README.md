@@ -1,15 +1,53 @@
 ---
 title: Deployment Project Template
-last revised: 2022/07/31
+last revised: 2022/08/21
 ---
 
-Project in development
+## Project Status - in development
 
-This is just a learning/demonstration of several different tools in the DevOps/GitOps space.  My ultimate goal is to have a unified environment running tools locally to develop in a kubernetes environment, but to also quickly deploy a "production" ready environment and application on prem or cloud.
+This is an active learning/demonstration of several different tools in the DevOps/GitOps space.  Feel free to use this as inspiration for your own work, but this is not a turn-key solution.  My ultimate goal is to have a unified environment running tools locally to develop in a kubernetes environment, but to also quickly deploy a "production" ready environment and application on prem or cloud.
 
-The goal is to create a solution where this can be accessed via [Visual Studio Code](https://code.visualstudio.com/) and the [Remote-Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension.
+Originally, my plan was to leverage the [Remote-Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension for [Visual Studio Code](https://code.visualstudio.com/).  I may still go that way, but I've recently run into issues using [third-party registries](https://github.com/microsoft/vscode-docker/issues/869).  Given that a number of Helm charts use `k8s.gcr.io` images, I'm in the process of updating my original solution.
 
-For local development, I built this solution with [Rancher Desktop](https://rancherdesktop.io/) and Windows in mind.  You may need to update the mounts section of the devcontainer.json file if you are using a different solution.  You will need to toggle your Kubernetes Settings to use the dockerd (moby) Container Runtime.  Ultimately I may update to use containerd runtime, but devcontainers don't use that currently.
+For local development, I built this solution with [Rancher Desktop](https://rancherdesktop.io/) and Windows in mind.  That part doesn't change, but to make everything else work, I'm going to use WSL2 for my development environment.  So the steps you'll need to get going are something like below.  If different OS, you can probably get through this okay, but I would consider a different approach.  I like WSL2 as a solution because it's isolated from the main OS - can recreate if something goes south.  Linux and Mac may want to stick with the devcontainer idea or something else that provides a degree of isolation from the OS.  I've left the devcontainer logic in place but I'm not improving/maintaining it at present.
+
+### Configure Rancher Desktop and WSL(including gh-cli and ansible):
+
+1. Enable Virtualization in BIOS
+2. [Install Rancher Desktop](https://docs.rancherdesktop.io/getting-started/installation) - I believe this will prompts enabling WSL in Windows, but if not...
+3. [Install Window Subsystem for Linux V2](https://docs.microsoft.com/en-us/windows/wsl/install)
+4. Optional: Install [Windows Terminal](https://docs.microsoft.com/en-us/windows/terminal/install).
+5. Install [Visual Studio Code](https://code.visualstudio.com/docs/setup/windows) and the [Remote Development Extension Pack](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack)
+6. [Deploy Linux image in WSL](https://www.microsoft.com/store/productId/9PN20MSR04DW) This is a link to the Ubuntu 22.04 image.  Feel free to sub if you so choose.  There are links out there that don't use the Microsoft store if needed.
+7. In PowerShell, type `wsl --list`.  If needed, type `wsl -s Ubuntu-22.04` to update the Default distribution.
+8. type `wsl` to enter the distribution. From here on out we're in bash.
+9. `sudo apt-add-repository ppa:ansible/ansible`
+10. `curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg`
+11. `sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg`
+12. `echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null`
+13. `sudo apt-get update && sudo apt-get -y upgrade`
+14. `sudo apt-get -y install ansible gh python3-pip`
+
+### Clone this repo
+
+1. `gh auth login` - follow the prompts.  This is optional, but if nothing else the gh-cli configures git for you so you don't have to worry about it.  Otherwise it can be annoying.
+2. `mkdir -p ~/code && cd ~/code` - I usually create a folder to store my projects.
+3. `gh repo clone wfordwfu/deployment-template && code deployment-template` - this should download the code server and open everything up in VS Code.
+
+### To deploy locally
+
+To deploy locally, run `ansible-playbook ansible/local.yml`.  The roles/applications that are installed are maintained in the ansible/vars/localhost.yml file.  I have not implemented a delete feature, so if you deploy a helm chart you don't wish to have, just delete the corresponding namespace.  This pattern mostly follows Ansible-Pull solutions I've implemented in the past.
+
+### To reset your environment
+
+- To reset the cluster, go into Rancher Desktop > Troubleshooting and click the Reset Kubernetes button
+- To reset WSL:
+  1. Go into powershell and type `wsl --unregister Ubuntu-22.04`
+  2. Pick up with step 6 under Configure Rancher Desktop and WSL above
+
+### Ansible vs Terraform
+
+*The below is still valid, but given I'm not leaning into devcontainers anymore, I needed something to handle a bit more configuration, so I'm leaning into Ansible a lot more.  That being said, Terraform still does a great job provisioning, but I haven't yet found anything better at configuration work than Ansible.*
 
 I started building out example terraform and ansible-pull projects.  I'm not sure where I'm going to go with those, but I was thinking through which tools I'd use for this solution.  At first I was thinking Terraform, and ultimately I may change my mind, but I think it's far more interesting to use Crossplane.  The downside to crossplane is that in a local situation, it requires a bit more effort to stand up an environment, so I decided Ansible was reasonable to handle that task.
 
@@ -17,15 +55,26 @@ NOTE: Currently there's a bug in WSL2 that affects devcontainers.  Terraform is 
 
 ## Features
 
-Currently the dev environment (debian) installs several languages (Go, Rust, Python), several cli tools (kubectl, helm, argo, crossplane, github, gcloud, azure, aws, k9s), and some useful tools in general (git, ansible, terraform).  Several tools are deployed locally to make the development experience as close to what dev/stage/prod would be like.
+Currently the dev environment (Ubuntu) installs several cloud native tools via the local ansible script (Helm, Traefik, Cert-Manager, ArgoCD, Grafana/Prometheus, Airflow) and the install steps provide some useful cli tools (gh, ansible).  My plans are to add back some additional features that were included in the devcontainer solution (Go, Rust, gcloud-cli, azure-cli, aws-cli, k9s, terraform).  If you have immediate need of these, some links to well done scripts can be found in the devcontainer section.  My plans are to create/recreate the same idea within ansible roles to be consistent.
 
 - To access [traefik dashboard](http://dashboard.traefik.127.0.0.1.sslip.io)
 - To access [argocd UI](http://argocd.127.0.0.1.sslip.io):
   - Username is admin
   - Password is `kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo`
-- To access [airflow UI](http://airflow.127.0.0.1.sslip.io):
+- To access [airflow UI](http://adminairflow.127.0.0.1.sslip.io):
   - Username is admin
   - Password is admin
+- To access [grafana UI](http://dashboard.grafana.127.0.0.1.sslip.io)
+  - Username is adminuser
+  - Password is p@ssword!
+  - ```bash
+      echo -n 'adminuser' > ./admin-user # change your username
+      echo -n 'p@ssword!' > ./admin-password # change your password
+      kubectl create namespace monitoring
+      kubectl create secret generic grafana-admin-credentials --from-file=./admin-user --from-file=admin-password -n monitoring
+      rm admin-user && rm admin-password
+    ```
+
 - To access [longhorn UI](http://longhorn.127.0.0.1.sslip.io):
   - TODO
 
