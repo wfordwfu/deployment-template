@@ -1,0 +1,6 @@
+---
+  - name: initialize docker
+    include: init/main.yml
+
+  - name: install docker applications
+    include: applications_container/main.yml

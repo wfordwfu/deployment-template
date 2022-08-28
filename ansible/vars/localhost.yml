@@ -8,8 +8,17 @@
     roles:
       git: false
       helm: true
+      kubectl: true
+      github: true
+      golang: true
+      rust: true
+      k9s: true
+      argocd_cli: true
+      k3d: false
+      oh_my_zsh: true
+      vscode: true
     
     applications:
       airflow: false
-      argocd: true
-      monitoring: true
+      argocd: false
+      monitoring: false

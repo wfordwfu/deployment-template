@@ -1,0 +1,7 @@
+---
+rust_version: '1.19'
+rust_platform: 'linux'
+rust_arch: 'amd64'
+rust_repo_path: 'https://go.dev/dl/'
+rust_bin_path: '~/.rustup'
+rust_path_var: '/usr/local/go/bin'

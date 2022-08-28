@@ -1,0 +1,58 @@
+---
+- name: Check if GitHub binary exists.
+  stat:
+    path: "{{ github_bin_path }}"
+  register: github_check
+
+- name: Check Latest Github release version (requires login to gh cli).
+  shell: gh api repos/cli/cli/releases -q '.[0].name'
+  # curl  "https://api.github.com/repos/golang/go/tags" | jq -r '.[0].name'
+  failed_when: false
+  changed_when: false
+  register: github_latest_version
+
+- name: Check for new stable version
+  debug:
+    msg: > 
+      - "A newer version of GitHub exists!""
+      - "Current target version is {{ github_version }}.""
+      - "Latest stable version is {{ github_latest_version.stdout }}."
+  when: >
+    not github_check.stat.exists
+    or github_version not in github_latest_version.stdout
+
+- name: Check GitHub version.
+  command: "{{ github_bin_path }} version | awk '{if(/gh version/) print $3}'"
+  failed_when: false
+  changed_when: false
+  register: github_existing_version
+
+- name: Download Github tar
+  get_url:
+    url: "{{ github_repo_path }}/releases/download/v{{ github_version }}/gh_{{ github_version }}_{{ github_platform }}_{{ github_arch }}.tar.gz"
+    dest: /tmp
+    checksum: "sha256:{{ github_repo_path }}/releases/download/v{{ github_version }}/gh_{{ github_version }}_checksums.txt"
+    mode: 0755
+  register: github_tar
+  when: >
+    not github_check.stat.exists
+    or github_version not in github_existing_version.stdout
+
+- name: Unarchive Github
+  unarchive:
+    src: "/tmp/gh_{{ github_version }}_{{ github_platform }}_{{ github_arch }}.tar.gz"
+    #dest: /tmp/gh_{{ github_version }}_{{ github_platform }}_{{ github_arch }}
+    dest: /tmp
+    remote_src: yes
+    mode: 0755
+  register: github_download
+  when: github_tar is changed
+
+- name: Copy github binary into place.
+  copy:
+    src: "/tmp/gh_{{ github_version }}_{{ github_platform }}_{{ github_arch }}/bin/gh"
+    dest: "{{ github_bin_path }}"
+    mode: 0755
+    remote_src: true
+  become: true
+  when: github_download is changed

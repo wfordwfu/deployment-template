@@ -1,0 +1,8 @@
+---
+# See available releases: 
+kubectl_version: v1.24.4
+kubectl_platform: linux
+kubectl_arch: amd64
+
+kubectl_repo_path: "https://dl.k8s.io/"
+kubectl_bin_path: /usr/local/bin/kubectl

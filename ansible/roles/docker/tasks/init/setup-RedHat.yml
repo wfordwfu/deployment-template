@@ -1,0 +1,45 @@
+---
+  - name: Ensure old versions of Docker are not installed
+    vars:
+      ansible_python_interpreter: /usr/bin/python
+    package:
+      name:
+        - docker
+        - docker-common
+        - docker-engine
+      state: absent
+  
+  - name: Add Docker GPG key
+    rpm_key:
+      key: "{{ docker_yum_gpg_key }}"
+      state: present
+
+  - name: Add Docker repository
+    get_url:
+      url: "{{ docker_yum_repo_url }}"
+      dest: '/etc/yum.repos.d/docker-{{ docker_edition }}.repo'
+      owner: root
+      group: root
+      mode: 0644
+      
+  - name: update /etc/yum.repos.d/docker-{{ docker_edition }}.repo to fix releasever bug
+  # This is a problem because releasever in RHEL is <version><system>, or 7Server, and not just 7 like in Centos
+  # WORKAROUND: Ideally I would query the value of releasever, but yum calculates at runtime.  
+  # See https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/system_administrators_guide/ch-yum#sec-Using_Yum_Variables
+    replace:
+      path: '/etc/yum.repos.d/docker-{{ docker_edition }}.repo'
+      regexp: "\\$releasever"
+      replace: '7'
+
+  - name: Configure containerd on RHEL 8.
+    block:
+      - name: Ensure container-selinux is installed.
+        package:
+          name: container-selinux
+          state: present
+
+      - name: Ensure containerd.io is installed.
+        package:
+          name: containerd.io
+          state: present
+    when: ansible_distribution_major_version | int == 8

@@ -1,0 +1,7 @@
+---
+- name: Install VS Code Extensions
+  ansible.builtin.shell: 
+    cmd: code --install-extension {{ item }}
+  args:
+    executable: /usr/bin/bash
+  loop: "{{ vs_code_extensions }}"

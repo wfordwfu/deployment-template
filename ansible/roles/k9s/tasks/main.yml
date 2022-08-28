@@ -1,0 +1,65 @@
+---
+- name: Check if k9s binary exists.
+  stat:
+    path: "{{ k9s_bin_path }}"
+  register: k9s_check
+
+- name: Check Latest k9s release version.
+  shell: curl  "https://api.github.com/repos/derailed/k9s/tags" | jq -r '.[0].name'
+  failed_when: false
+  changed_when: false
+  register: k9s_latest_version
+
+- name: Check for new stable version
+  debug:
+    msg: > 
+      - "A newer version of k9s exists!""
+      - "Current target version is {{ k9s_version }}.""
+      - "Latest stable version is {{ k9s_latest_version.stdout }}."
+  when: >
+    not k9s_check.stat.exists
+    or k9s_version not in k9s_latest_version.stdout
+
+- name: Check k9s version.
+  command: "{{ k9s_bin_path }} version | awk '{if(/Version:/) print $2}'"
+  failed_when: false
+  changed_when: false
+  register: k9s_existing_version
+
+- name: Download k9s tar
+  get_url:
+    url: "{{ k9s_repo_path }}/releases/download/{{ k9s_version }}/k9s_{{ k9s_platform }}_{{ k9s_arch }}.tar.gz"
+    dest: /tmp
+    checksum: "sha256:{{ k9s_repo_path }}/releases/download/{{ k9s_version }}/checksums.txt"
+    mode: 0755
+  register: k9s_tar
+  when: >
+    not k9s_check.stat.exists
+    or k9s_version not in k9s_existing_version.stdout
+
+- name: Unarchive k9s
+  unarchive:
+    src: "/tmp/k9s_{{ k9s_platform }}_{{ k9s_arch }}.tar.gz"
+    dest: /tmp
+    remote_src: yes
+    mode: 0755
+  register: k9s_download
+  when: k9s_tar is changed
+
+- name: Copy k9s binary into place.
+  copy:
+    src: "/tmp/k9s"
+    dest: "{{ k9s_bin_path }}"
+    mode: 0755
+    remote_src: true
+  become: true
+  when: k9s_download is changed
+
+- name: Copy k9s environmental variables
+  copy:
+    src: k9s.sh
+    dest: /etc/profile.d/k9s.sh
+    owner: root
+    group: root
+    mode: 0644
+  become: true

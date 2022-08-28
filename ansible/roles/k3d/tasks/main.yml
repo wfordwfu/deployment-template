@@ -1,0 +1,61 @@
+---
+- name: Check if k3d binary exists.
+  stat:
+    path: "{{ k3d_bin_path }}"
+  register: k3d_check
+
+- name: Check github latest release of k3d (requires login to gh cli).
+  shell: gh api repos/k3d-io/k3d/releases -q '.[0].name'
+  # curl  "https://api.github.com/repos/k3d-io/k3d/tags" | jq -r '.[0].name'
+  failed_when: false
+  changed_when: false
+  register: k3d_latest_version
+
+- name: Check for new stable version
+  debug:
+    msg: > 
+      - "A newer version of helm exists!""
+      - "Current target version is {{ k3d_version }}.""
+      - "Latest stable version is {{ k3d_latest_version.stdout }}."
+  when: >
+    not k3d_check.stat.exists
+    or k3d_version not in k3d_latest_version.stdout
+#- name: Get Release Body
+#  shell: gh api repos/k3d-io/k3d/releases -q '.[0].body'
+#  failed_when: false
+#  changed_when: false
+#  register: k3d_release_notes
+#  when: >
+#    not k3d_check.stat.exists
+#    or k3d_version not in k3d_latest_version.stdout
+
+#- name: Msg Release Notes
+#  debug:
+#    msg: "{{ k3d_release_notes.stdout }}"
+#  when: k3d_release_notes is changed
+
+- name: Check k3d installed version.
+  shell: "k3d version | awk '{if(/k3d version /) print $3}'"
+  failed_when: false
+  changed_when: false
+  register: k3d_existing_version
+  when: k3d_check.stat.exists
+
+- name: Download k3d.
+  ansible.builtin.get_url:
+    url: "{{ k3d_repo_path }}/{{ k3d_version }}/k3d-{{ k3d_os }}-{{ k3d_arch }}"
+    dest: /tmp/k3d
+    mode: 0755
+    #checksum: "sha256:https://dl.k8s.io/{{ kubectl_version }}/bin/{{ kubectl_platform }}/{{ kubectl_arch }}/kubectl.sha256"
+  register: k3d_download
+  when: >
+    not k3d_check.stat.exists
+    or k3d_version not in k3d_existing_version.stdout
+- name: Copy k3d binary into place.
+  copy:
+    src: "/tmp/k3d"
+    dest: "{{ k3d_bin_path }}"
+    mode: 0755
+    remote_src: true
+  become: true
+  when: k3d_download is changed

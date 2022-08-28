@@ -1,0 +1,25 @@
+---
+- name: Check if Krew Installed
+  stat:
+    path: "~/.krew"
+  register: krew_check
+
+- name: Install Krew
+  shell: >
+    (
+      set -x; cd "$(mktemp -d)" &&
+      OS="$(uname | tr '[:upper:]' '[:lower:]')" &&
+      ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" &&
+      KREW="krew-${OS}_${ARCH}" &&
+      curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/${KREW}.tar.gz" &&
+      tar zxvf "${KREW}.tar.gz" &&
+      ./"${KREW}" install krew
+    )
+  when: not krew_check.stat.exists
+
+- name: Add another bin dir to system-wide $PATH.
+  copy:
+    dest: /etc/profile.d/custom-path.sh
+    content: 'PATH=$PATH:$HOME/.krew/bin'
+  become: true
+  when: ansible_env.PATH is not search('$HOME/.krew/bin')

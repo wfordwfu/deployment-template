@@ -1,0 +1,58 @@
+---
+- name: Check if argocd_cli binary exists.
+  stat:
+    path: "{{ argocd_cli_bin_path }}"
+  register: argocd_cli_check
+
+- name: Check Latest argocd_cli release version.
+  shell: curl  "https://api.github.com/repos/argoproj/argo-cd/tags" | jq -r '.[0].name'
+  failed_when: false
+  changed_when: false
+  register: argocd_cli_latest_version
+
+- name: Check for new version
+  debug:
+    msg: > 
+      - "A newer version of argocd_cli exists!""
+      - "Current target version is {{ argocd_cli_version }}.""
+      - "Latest stable version is {{ argocd_cli_latest_version.stdout }}."
+  when: >
+    not argocd_cli_check.stat.exists
+    or argocd_cli_version not in argocd_cli_latest_version.stdout
+
+- name: Check argocd_cli version.
+  command: "{{ argocd_cli_bin_path }} version --client | awk '{if(/argocd:/) print $2}' | cut -d + -f 1"
+  failed_when: false
+  changed_when: false
+  register: argocd_cli_existing_version
+
+- name: register argocd_cli sha
+  uri:
+    url: "{{ argocd_cli_repo_path }}/releases/download/{{ argocd_cli_version }}/argocd-{{ argocd_cli_platform }}-{{ argocd_cli_arch }}.sha256"
+    return_content: true
+  failed_when: false
+  changed_when: false
+  register: argocd_cli_checksum
+  when: >
+    not argocd_cli_check.stat.exists
+    or argocd_cli_version not in argocd_cli_existing_version.stdout
+
+- name: Download argocd_cli tar
+  get_url:
+    url: "{{ argocd_cli_repo_path }}/releases/download/{{ argocd_cli_version }}/argocd-{{ argocd_cli_platform }}-{{ argocd_cli_arch }}"
+    dest: /tmp
+    checksum: "sha256:{{ argocd_cli_checksum.content.split('  ')[0] }}"
+    mode: 0755
+  register: argocd_cli_download
+  when: >
+    not argocd_cli_check.stat.exists
+    or argocd_cli_version not in argocd_cli_existing_version.stdout
+
+- name: Copy argocd_cli binary into place.
+  copy:
+    src: "/tmp/argocd-{{ argocd_cli_platform }}-{{ argocd_cli_arch }}"
+    dest: "{{ argocd_cli_bin_path }}"
+    mode: 0755
+    remote_src: true
+  become: true
+  when: argocd_cli_download is changed

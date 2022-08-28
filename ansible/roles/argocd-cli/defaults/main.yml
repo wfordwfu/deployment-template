@@ -1,0 +1,6 @@
+---
+argocd_cli_version: 'v2.4.11'
+argocd_cli_platform: 'linux'
+argocd_cli_arch: 'amd64'
+argocd_cli_repo_path: 'https://github.com/argoproj/argo-cd'
+argocd_cli_bin_path: '/usr/local/bin/argocd'

@@ -4,6 +4,22 @@
     path: "{{ helm_bin_path }}"
   register: helm_check
 
+- name: Check Latest Helm release version (requires login to gh cli).
+  shell: gh api repos/helm/helm/releases -q '.[0].name'
+  # curl  "https://api.github.com/repos/helm/helm/tags" | jq -r '.[0].name'
+  failed_when: false
+  changed_when: false
+  register: helm_latest_version
+
+- name: Check for new stable version
+  debug:
+    msg: > 
+      - "A newer version of helm exists!""
+      - "Current target version is {{ helm_version }}.""
+      - "Latest stable version is {{ helm_latest_version.stdout }}."
+  when: >
+    not helm_check.stat.exists
+    or helm_version not in helm_latest_version.stdout
 - name: Check Helm version.
   command: "{{ helm_bin_path }} version"
   failed_when: false
@@ -28,3 +44,8 @@
     remote_src: true
   become: true
   when: helm_download is changed
+
+- name: Install Helm Diff Plugin
+  kubernetes.core.helm_plugin:
+    plugin_path: https://github.com/databus23/helm-diff
+    state: present

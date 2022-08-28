@@ -1,0 +1,7 @@
+---
+
+k3d_version: v5.4.4
+k3d_repo_path: https://github.com/k3d-io/k3d/releases/download
+k3d_os: linux
+k3d_arch: amd64
+k3d_bin_path: /usr/local/bin/k3d

@@ -1,0 +1,12 @@
+---
+os_specific_dependencies:
+  - curl
+  - jq
+  - gnupg
+  - apt-transport-https
+  - ca-certificates
+  - powerline 
+  - fonts-powerline
+  - neovim
+  - tree
+  - lynx

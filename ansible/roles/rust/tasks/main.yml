@@ -1,0 +1,20 @@
+---
+- name: Check if Rustup exists.
+  stat:
+    path: "{{ rust_bin_path }}"
+  register: rust_check
+
+- name: Install Rustup
+  shell: curl --proto '=https' --tlsv1.3 https://sh.rustup.rs -sSf | sh
+  when: not rust_check.stat.exists
+
+- name: Add another bin dir to system-wide $PATH.
+  copy:
+    dest: /etc/profile.d/custom-path.sh
+    content: 'PATH=$PATH:$HOME/.cargo/bin'
+  become: true
+  when: ansible_env.PATH is not search('$HOME/.cargo/bin')
+
+- name: Update Rustup
+  shell: rustup update
+  when: rust_check.stat.exists

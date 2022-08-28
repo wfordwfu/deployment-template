@@ -1,0 +1,63 @@
+---
+- name: Check if kubectl binary exists.
+  stat:
+    path: "{{ kubectl_bin_path }}"
+  register: kubectl_check
+
+- name: Check stable kubectl release version
+  command: curl -L -s https://dl.k8s.io/release/stable.txt
+  failed_when: false
+  changed_when: false
+  register: kubectl_latest_version
+
+- name: Check for new stable version
+  debug:
+    msg: > 
+      - "A newer version of kubectl exists!""
+      - "Current target version is {{ kubectl_version }}.""
+      - "Latest stable version is {{ kubectl_latest_version.stdout }}."
+  when: >
+    not kubectl_check.stat.exists
+    or kubectl_version not in kubectl_latest_version.stdout
+- name: Check kubectl version.
+  shell: "{{ kubectl_bin_path }} version --client=true --output=yaml | awk '{if(/gitVersion:/) print $2}'"
+  #shell: "{{ kubectl_bin_path }} version --client=true --output=yaml | grep 'gitVersion:'"
+  failed_when: false
+  changed_when: false
+  register: kubectl_existing_version
+  when: kubectl_check.stat.exists
+
+- name: register kubectl sha
+  uri:
+    url: "https://storage.googleapis.com/kubernetes-release/release/{{ kubectl_version }}/bin/{{ kubectl_platform }}/{{ kubectl_arch }}/kubectl.sha256"
+    return_content: true
+  failed_when: false
+  changed_when: false
+  register: kubectl_checksum
+  when: >
+    not kubectl_check.stat.exists
+    or kubectl_version not in kubectl_existing_version.stdout
+
+- name: Download kubectl.
+  ansible.builtin.get_url:
+    url: "{{ kubectl_repo_path }}/release/{{ kubectl_version }}/bin/{{ kubectl_platform }}/{{ kubectl_arch }}/kubectl"
+    dest: /tmp/kubectl
+    mode: 0755
+    #https://storage.googleapis.com/kubernetes-release/release/v1.25.0/bin/linux/amd64
+    checksum: "sha256:{{ kubectl_checksum.content.split('  ')[0] }}"
+  register: kubectl_download
+  when: >
+    not kubectl_check.stat.exists
+    or kubectl_version not in kubectl_existing_version.stdout
+
+- name: Copy kubectl binary into place.
+  copy:
+    src: "/tmp/kubectl"
+    dest: "{{ kubectl_bin_path }}"
+    mode: 0755
+    remote_src: true
+  become: true
+  when: kubectl_download is changed
+
+- name: Install Krew
+  import_tasks: krew.yml

@@ -1,6 +1,6 @@
 ---
 title: Deployment Project Template
-last revised: 2022/08/21
+last revised: 2022/08/28
 ---
 
 ## Project Status - in development
@@ -10,6 +10,47 @@ This is an active learning/demonstration of several different tools in the DevOp
 Originally, my plan was to leverage the [Remote-Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension for [Visual Studio Code](https://code.visualstudio.com/).  I may still go that way, but I've recently run into issues using [third-party registries](https://github.com/microsoft/vscode-docker/issues/869).  Given that a number of Helm charts use `k8s.gcr.io` images, I'm in the process of updating my original solution.
 
 For local development, I built this solution with [Rancher Desktop](https://rancherdesktop.io/) and Windows in mind.  That part doesn't change, but to make everything else work, I'm going to use WSL2 for my development environment.  So the steps you'll need to get going are something like below.  If different OS, you can probably get through this okay, but I would consider a different approach.  I like WSL2 as a solution because it's isolated from the main OS - can recreate if something goes south.  Linux and Mac may want to stick with the devcontainer idea or something else that provides a degree of isolation from the OS.  I've left the devcontainer logic in place but I'm not improving/maintaining it at present.
+
+### Ansible vs Terraform
+
+*The below is still valid, but given I'm not leaning into devcontainers anymore, I needed something to handle a bit more configuration, so I'm leaning into Ansible a lot more.  That being said, Terraform still does a great job provisioning, but I haven't yet found anything better at configuration work than Ansible.*
+
+I started building out example terraform and ansible-pull projects.  I'm not sure where I'm going to go with those, but I was thinking through which tools I'd use for this solution.  At first I was thinking Terraform, and ultimately I may change my mind, but I think it's far more interesting to use Crossplane.  The downside to crossplane is that in a local situation, it requires a bit more effort to stand up an environment, so I decided Ansible was reasonable to handle that task.
+
+NOTE: Currently there's a bug in WSL2 that affects devcontainers.  Terraform is impacted.  before running terraform commands vim into /etc/resolve.conf and set the nameserver to 1.1.1.1 or 8.8.8.8, something like that.  This is just a workaround, so I'm not going to update the files to automatically fix. --[Github issue](https://github.com/microsoft/WSL/issues/8022)
+
+## Features
+
+Currently the dev environment (Ubuntu) installs several things via Ansible script:
+
+- shell, languages or cli tools (gh, ansible, k9s, Go, Rust, argocd, Oh My Zsh, k3d)
+- Visual Studio Code extensions
+- Helm charts via the local ansible script (Helm, Traefik, Cert-Manager, ArgoCD, Grafana/Prometheus, Airflow)
+
+The specific features selected can be tweaked via `ansible/vars/localhost.yml`.  My plans are to add back some additional features that were included in the devcontainer solution (gcloud-cli, azure-cli, aws-cli, terraform). I still need to add additional configurations to Oh My Zsh.  If you have immediate need of these, some links to well done scripts can be found in the devcontainer section.  My plans are to create/recreate the same idea within ansible roles to be consistent.
+
+- To access [traefik dashboard](http://dashboard.traefik.127.0.0.1.sslip.io)
+- To access [argocd UI](http://argocd.127.0.0.1.sslip.io):
+  - Username is admin
+  - Password is `kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo`
+- To access [airflow UI](http://adminairflow.127.0.0.1.sslip.io):
+  - Username is admin
+  - Password is admin
+- To access [grafana UI](http://dashboard.grafana.127.0.0.1.sslip.io)
+  - Username is adminuser
+  - Password is p@ssword!
+  - ```bash
+      echo -n 'adminuser' > ./admin-user # change your username
+      echo -n 'p@ssword!' > ./admin-password # change your password
+      kubectl create namespace monitoring
+      kubectl create secret generic grafana-admin-credentials --from-file=./admin-user --from-file=admin-password -n monitoring
+      rm admin-user && rm admin-password
+    ```
+
+- To access [longhorn UI](http://longhorn.127.0.0.1.sslip.io):
+  - TODO
+
+## Getting Started
 
 ### Configure Rancher Desktop and WSL(including gh-cli and ansible):
 
@@ -36,7 +77,7 @@ For local development, I built this solution with [Rancher Desktop](https://ranc
 
 ### To deploy locally
 
-To deploy locally, run `ansible-playbook ansible/local.yml`.  The roles/applications that are installed are maintained in the ansible/vars/localhost.yml file.  I have not implemented a delete feature, so if you deploy a helm chart you don't wish to have, just delete the corresponding namespace.  This pattern mostly follows Ansible-Pull solutions I've implemented in the past.
+To deploy locally, run `ansible-playbook ansible/local.yml -K`.  The roles/applications that are installed are maintained in the ansible/vars/localhost.yml file.  I have not implemented a delete feature, so if you deploy a helm chart you don't wish to have, just delete the corresponding namespace.  This pattern mostly follows Ansible-Pull solutions I've implemented in the past.
 
 ### To reset your environment
 
@@ -44,52 +85,6 @@ To deploy locally, run `ansible-playbook ansible/local.yml`.  The roles/applicat
 - To reset WSL:
   1. Go into powershell and type `wsl --unregister Ubuntu-22.04`
   2. Pick up with step 6 under Configure Rancher Desktop and WSL above
-
-### Ansible vs Terraform
-
-*The below is still valid, but given I'm not leaning into devcontainers anymore, I needed something to handle a bit more configuration, so I'm leaning into Ansible a lot more.  That being said, Terraform still does a great job provisioning, but I haven't yet found anything better at configuration work than Ansible.*
-
-I started building out example terraform and ansible-pull projects.  I'm not sure where I'm going to go with those, but I was thinking through which tools I'd use for this solution.  At first I was thinking Terraform, and ultimately I may change my mind, but I think it's far more interesting to use Crossplane.  The downside to crossplane is that in a local situation, it requires a bit more effort to stand up an environment, so I decided Ansible was reasonable to handle that task.
-
-NOTE: Currently there's a bug in WSL2 that affects devcontainers.  Terraform is impacted.  before running terraform commands vim into /etc/resolve.conf and set the nameserver to 1.1.1.1 or 8.8.8.8, something like that.  This is just a workaround, so I'm not going to update the files to automatically fix. --[Github issue](https://github.com/microsoft/WSL/issues/8022)
-
-## Features
-
-Currently the dev environment (Ubuntu) installs several cloud native tools via the local ansible script (Helm, Traefik, Cert-Manager, ArgoCD, Grafana/Prometheus, Airflow) and the install steps provide some useful cli tools (gh, ansible).  My plans are to add back some additional features that were included in the devcontainer solution (Go, Rust, gcloud-cli, azure-cli, aws-cli, k9s, terraform).  If you have immediate need of these, some links to well done scripts can be found in the devcontainer section.  My plans are to create/recreate the same idea within ansible roles to be consistent.
-
-- To access [traefik dashboard](http://dashboard.traefik.127.0.0.1.sslip.io)
-- To access [argocd UI](http://argocd.127.0.0.1.sslip.io):
-  - Username is admin
-  - Password is `kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo`
-- To access [airflow UI](http://adminairflow.127.0.0.1.sslip.io):
-  - Username is admin
-  - Password is admin
-- To access [grafana UI](http://dashboard.grafana.127.0.0.1.sslip.io)
-  - Username is adminuser
-  - Password is p@ssword!
-  - ```bash
-      echo -n 'adminuser' > ./admin-user # change your username
-      echo -n 'p@ssword!' > ./admin-password # change your password
-      kubectl create namespace monitoring
-      kubectl create secret generic grafana-admin-credentials --from-file=./admin-user --from-file=admin-password -n monitoring
-      rm admin-user && rm admin-password
-    ```
-
-- To access [longhorn UI](http://longhorn.127.0.0.1.sslip.io):
-  - TODO
-
-## Getting Started
-
-- Install WSL2
-- Install Rancher Desktop
-- Install VSCode and Remote-Containers Extension
-
-## Issues/future enhancements
-
-- Build out Longhorn logic
-- Add MetalLB
-- Add Kubeflow
-- Add Prometheus/Grafana
 
 ## Notes
 
@@ -181,7 +176,6 @@ persistence:
 
 ### Helm Charts
 
-- [Crossplane](https://crossplane.io/docs/v1.7/reference/install.html)
 - [Argo CD](https://github.com/argoproj/argo-helm/tree/master/charts/argo-cd)
 - [Airflow](https://airflow.apache.org/docs/helm-chart/stable/index.html)
 - [Loki](https://grafana.com/docs/loki/latest/installation/helm/)

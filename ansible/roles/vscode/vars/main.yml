@@ -1,0 +1,9 @@
+vs_code_extensions:
+  - ms-kubernetes-tools.vscode-kubernetes-tools
+  - rust-lang.rust-analyzer
+  - redhat.vscode-yaml
+  - oderwat.indent-rainbow
+  - mutantdino.resourcemonitor
+  - golang.Go
+  - donjayamanne.githistory
+  - yzhang.markdown-all-in-one

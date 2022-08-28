@@ -1,0 +1,65 @@
+---
+- name: Check if Go binary exists.
+  stat:
+    path: "{{ golang_bin_path }}"
+  register: golang_check
+
+- name: Check Latest Go release version (requires login to gh cli).
+  shell: curl https://go.dev/VERSION?m=text
+  # curl  "https://api.github.com/repos/golang/go/tags" | jq -r '.[0].name'
+  failed_when: false
+  changed_when: false
+  register: golang_latest_version
+
+- name: Check for new stable version
+  debug:
+    msg: > 
+      - "A newer version of Go Lang exists!""
+      - "Current target version is {{ golang_version }}.""
+      - "Latest stable version is {{ golang_latest_version.stdout }}."
+  when: >
+    not golang_check.stat.exists
+    or golang_version not in golang_latest_version.stdout
+
+- name: Check Go version.
+  command: "{{ golang_bin_path }} version"
+  failed_when: false
+  changed_when: false
+  register: golang_existing_version
+
+- name: Download Go tar
+  get_url:
+    url: "{{ golang_repo_path }}/go{{ golang_version }}.{{ golang_platform }}-{{ golang_arch }}.tar.gz"
+    dest: /tmp
+    checksum: "sha256:{{ golang_checksum }}"
+    mode: 0755
+  register: golang_tar
+  when: >
+    not golang_check.stat.exists
+    or golang_version not in golang_existing_version.stdout
+
+- name: Unarchive Go
+  unarchive:
+    src: "/tmp/go{{ golang_version }}.{{ golang_platform }}-{{ golang_arch }}.tar.gz"
+    dest: /tmp
+    remote_src: yes
+    mode: 0755
+  register: golang_download
+  when: golang_tar is changed
+
+- name: Copy Go binary into place.
+  copy:
+    src: "/tmp/go/"
+    dest: "{{ golang_bin_path }}/"
+    mode: 0755
+    remote_src: true
+    directory_mode: true
+  become: true
+  when: golang_download is changed
+
+- name: Add another bin dir to system-wide $PATH.
+  copy:
+    dest: /etc/profile.d/custom-path.sh
+    content: 'PATH=$PATH:{{ golang_path_var }}'
+  become: true
+  when: ansible_env.PATH is not search(golang_path_var)

@@ -1,0 +1,5 @@
+github_version: '2.14.7'
+github_platform: 'linux'
+github_arch: 'amd64'
+github_repo_path: 'https://github.com/cli/cli'
+github_bin_path: '/usr/local/bin/gh'

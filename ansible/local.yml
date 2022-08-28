@@ -6,17 +6,76 @@
   pre_tasks:
     #- include_vars: "ansible/vars/{{ lookup('env', 'HOSTNAME') }}.yml"
     - include_vars: "vars/localhost.yml"
-  
+
+    - name: Include OS-specific variables (Debian).
+      include_vars: "{{ ansible_os_family }}.yml"
+      when: ansible_os_family == "Debian"
+
+    - name: Define OS-specific dependencies.
+      set_fact:
+        os_specific_dependencies: "{{ __os_specific_dependencies | list }}"
+      when: os_specific_dependencies is not defined
+
+#    - name: Print Path
+#      debug:
+#        msg: "{{ ansible_env.PATH }}"
+
   tasks:
+    - name: Ensure OS-specific dependencies are installed.
+      package:
+        name: "{{ os_specific_dependencies }}"
+        state: present
+      become: true
+
     - name: implement helm role
       include_role:
         name: helm
       when: roles.helm == true
 
+    - name: implement kubectl role
+      include_role:
+        name: kubectl
+      when: roles.kubectl == true
+
     - name: implement git role
       include_role:
         name: git
       when: roles.git == true
+
+    - name: implement github role
+      include_role:
+        name: github
+      when: roles.github == true
+
+    - name: implement rust role
+      include_role:
+        name: rust
+      when: roles.rust == true
+
+    - name: implement golang role
+      include_role:
+        name: golang
+      when: roles.golang == true
+    
+    - name: implement k9s role
+      include_role:
+        name: k9s
+      when: roles.k9s == true
+
+    - name: implement argocd-cli role
+      include_role:
+        name: argocd-cli
+      when: roles.argocd_cli == true
+
+    - name: implement Oh My Zsh
+      include_role:
+        name: oh-my-zsh
+      when: roles.oh_my_zsh == true
+
+    - name: maintain VS Code extensions
+      include_role:
+        name: vscode
+      when: roles.vscode == true
 
     - name: Get nodes
       command: kubectl get nodes
@@ -30,21 +89,6 @@
     - name: Install kubernetes module
       ansible.builtin.pip:
         name: kubernetes
-
-
-
-    - name: Install Helm Diff Plugin
-      kubernetes.core.helm_plugin:
-        plugin_path: https://github.com/databus23/helm-diff
-        state: present
-
-# should be here, but just in case.  You'll need 
-#    - name: Create a directory if it does not exist
-#      become: yes
-#      ansible.builtin.file:
-#        path: /tmp
-#        state: directory
-#        mode: '0777'
 
     - name: Download Rancher Local Path Storage Manifest
       ansible.builtin.get_url:
@@ -82,9 +126,6 @@
     - name: include Airflow
       import_tasks: include/airflow-helm.yml
       when: applications.airflow == true
-
-#    - name: include Kubernetes Dashboard
-#      import_tasks: ansible/kubernetes-dashboard-helm.yml
 
 #    - name: include Longhorn
 #      import_tasks: ansible/longhorn-helm.yml
