@@ -1,0 +1,9 @@
+---
+# See available releases: https://github.com/cert-manager/cert-manager/releases
+cmctl_version: 'v1.9.1'
+cmctl_platform: linux
+cmctl_arch: amd64
+
+cmctl_repo_path: "https://github.com/cert-manager/cert-manager"
+
+cmctl_bin_path: /usr/local/bin/cmctl

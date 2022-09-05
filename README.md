@@ -1,21 +1,25 @@
 ---
 title: Deployment Project Template
-last revised: 2022/08/28
+last revised: 2022/09/05
 ---
 
 ## Project Status - in development
 
 This is an active learning/demonstration of several different tools in the DevOps/GitOps space.  Feel free to use this as inspiration for your own work, but this is not a turn-key solution.  My ultimate goal is to have a unified environment running tools locally to develop in a kubernetes environment, but to also quickly deploy a "production" ready environment and application on prem or cloud.
 
-Originally, my plan was to leverage the [Remote-Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension for [Visual Studio Code](https://code.visualstudio.com/).  I may still go that way, but I've recently run into issues using [third-party registries](https://github.com/microsoft/vscode-docker/issues/869).  Given that a number of Helm charts use `k8s.gcr.io` images, I'm in the process of updating my original solution.
+For local development, I built this solution with [Rancher Desktop](https://rancherdesktop.io/) and Windows in mind.  
 
-For local development, I built this solution with [Rancher Desktop](https://rancherdesktop.io/) and Windows in mind.  That part doesn't change, but to make everything else work, I'm going to use WSL2 for my development environment.  So the steps you'll need to get going are something like below.  If different OS, you can probably get through this okay, but I would consider a different approach.  I like WSL2 as a solution because it's isolated from the main OS - can recreate if something goes south.  Linux and Mac may want to stick with the devcontainer idea or something else that provides a degree of isolation from the OS.  I've left the devcontainer logic in place but I'm not improving/maintaining it at present.
+I had been experimenting with using devcontainers as a solution to create consistent and ephemeral development environments, but there are headaches in that solution.  First, it's still reliant on Docker.  Second, the solution has a lot of overhead.  Even avoiding adding shell scripts at the end, it does a lot of rebuilding for what should be based on an image.  And on something like a regular laptop, it's going to use a lot of resources- forget running Zoom/WebEx and continue development work. 
+
+I don't want to oversell it- WSL isn't a slam dunk replacement.  Think of it more like an incremental change.  It feels a little more efficient with resources.  It's more permanent than a container, so there's less re-building.  
+
+It's the re-building that has me the most excited.  The problem that I've been trying to solve lately has been making my local and other environments more consistent.  That's why things like Rancher Desktop are so appealing to me.  While Docker is ephemeral and idempotent, Docker-Compose doesn't replicate Kubernetes.  Also, devcontainers doesn't help me with my goal either.  Building out all the parameters in a devcontainer.json doesn't do anything for the project- it'll never be like dev, stage, prod or whatever.  But in using WSL, I can leverage ansible, which is a solution I love and does get me closer to parity between my environments.
+
+So the steps you'll need to get going are something like below.  If different OS, you can probably get through this okay, but this approach needs some tweaking.  I like WSL2 as a solution because it's isolated from the main OS - can recreate if something goes south.  Linux and Mac may want to stick with the devcontainer idea or something else that provides a degree of isolation from the OS - QEMU, LXC or KVM.  I've left the devcontainer logic in place but I'm not improving/maintaining it at present.
 
 ### Ansible vs Terraform
 
-*The below is still valid, but given I'm not leaning into devcontainers anymore, I needed something to handle a bit more configuration, so I'm leaning into Ansible a lot more.  That being said, Terraform still does a great job provisioning, but I haven't yet found anything better at configuration work than Ansible.*
-
-I started building out example terraform and ansible-pull projects.  I'm not sure where I'm going to go with those, but I was thinking through which tools I'd use for this solution.  At first I was thinking Terraform, and ultimately I may change my mind, but I think it's far more interesting to use Crossplane.  The downside to crossplane is that in a local situation, it requires a bit more effort to stand up an environment, so I decided Ansible was reasonable to handle that task.
+I started building out example terraform and ansible-pull projects in this repo.  I'm not sure where I'm going to go with those, but I was thinking through which tools I'd use for this solution.  At first I was thinking Terraform, and ultimately I may change my mind, but I think it's far more interesting to use Crossplane.  The downside to crossplane is that in a local situation, it requires a bit more effort to stand up an environment, so I decided Ansible was reasonable to handle that task.
 
 NOTE: Currently there's a bug in WSL2 that affects devcontainers.  Terraform is impacted.  before running terraform commands vim into /etc/resolve.conf and set the nameserver to 1.1.1.1 or 8.8.8.8, something like that.  This is just a workaround, so I'm not going to update the files to automatically fix. --[Github issue](https://github.com/microsoft/WSL/issues/8022)
 
@@ -23,7 +27,7 @@ NOTE: Currently there's a bug in WSL2 that affects devcontainers.  Terraform is 
 
 Currently the dev environment (Ubuntu) installs several things via Ansible script:
 
-- shell, languages or cli tools (gh, ansible, k9s, Go, Rust, argocd, Oh My Zsh, k3d)
+- shell, languages or cli tools (gh, ansible, k9s, Go, Rust, argocd-cli, Oh My Zsh, k3d, cmctl, minio-cli)
 - Visual Studio Code extensions
 - Helm charts via the local ansible script (Helm, Traefik, Cert-Manager, ArgoCD, Grafana/Prometheus, Airflow)
 
@@ -37,18 +41,8 @@ The specific features selected can be tweaked via `ansible/vars/localhost.yml`. 
   - Username is admin
   - Password is admin
 - To access [grafana UI](http://dashboard.grafana.127.0.0.1.sslip.io)
-  - Username is adminuser
-  - Password is p@ssword!
-  - ```bash
-      echo -n 'adminuser' > ./admin-user # change your username
-      echo -n 'p@ssword!' > ./admin-password # change your password
-      kubectl create namespace monitoring
-      kubectl create secret generic grafana-admin-credentials --from-file=./admin-user --from-file=admin-password -n monitoring
-      rm admin-user && rm admin-password
-    ```
-
-- To access [longhorn UI](http://longhorn.127.0.0.1.sslip.io):
-  - TODO
+  - Username is admin
+  - Password is `kubectl -n monitoring get secret grafana-admin-credentials -o jsonpath="{.data.password}" | base64 -d; echo`
 
 ## Getting Started
 
@@ -164,6 +158,7 @@ persistence:
 - [Argo CD](https://argoproj.github.io/cd)
 - [Argo CD docs](https://argo-cd.readthedocs.io/en/stable/)
 - [Argo CD Cli](https://argo-cd.readthedocs.io/en/stable/cli_installation/)
+- [MinIO for Kubernetes](https://min.io/product/kubernetes)
 - [Kubectl Krew plugin manager](https://krew.sigs.k8s.io/docs/user-guide/quickstart/)
 - [Krew plugins list](https://krew.sigs.k8s.io/plugins/)
 - [kubectl cert-manager plugin](https://github.com/cert-manager/cert-manager)
@@ -189,3 +184,4 @@ persistence:
 - [vCluster](https://www.vcluster.com/docs/what-are-virtual-clusters)
 - [Kubescape](https://github.com/armosec/kubescape)
 - [Synk GH Actions](https://github.com/marketplace/actions/snyk)
+- [How to Run minio with traefik](https://docs.min.io/docs/how-to-run-multiple-minio-servers-with-traef-k.html)

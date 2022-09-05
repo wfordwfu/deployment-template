@@ -30,52 +30,62 @@
     - name: implement helm role
       include_role:
         name: helm
-      when: roles.helm == true
+      when: incRoles.helm == true
 
     - name: implement kubectl role
       include_role:
         name: kubectl
-      when: roles.kubectl == true
+      when: incRoles.kubectl == true
+
+    - name: implement cmctl role
+      include_role:
+        name: cmctl
+      when: incRoles.cmctl == true
 
     - name: implement git role
       include_role:
         name: git
-      when: roles.git == true
+      when: incRoles.git == true
 
     - name: implement github role
       include_role:
         name: github
-      when: roles.github == true
+      when: incRoles.github == true
 
     - name: implement rust role
       include_role:
         name: rust
-      when: roles.rust == true
+      when: incRoles.rust == true
 
     - name: implement golang role
       include_role:
         name: golang
-      when: roles.golang == true
+      when: incRoles.golang == true
     
     - name: implement k9s role
       include_role:
         name: k9s
-      when: roles.k9s == true
+      when: incRoles.k9s == true
 
     - name: implement argocd-cli role
       include_role:
         name: argocd-cli
-      when: roles.argocd_cli == true
+      when: incRoles.argocd_cli == true
+
+    - name: implement minio-cli role
+      include_role:
+        name: minio-cli
+      when: incRoles.minio_cli == true
 
     - name: implement Oh My Zsh
       include_role:
         name: oh-my-zsh
-      when: roles.oh_my_zsh == true
+      when: incRoles.oh_my_zsh == true
 
     - name: maintain VS Code extensions
       include_role:
         name: vscode
-      when: roles.vscode == true
+      when: incRoles.vscode == true
 
     - name: Get nodes
       command: kubectl get nodes
@@ -114,6 +124,10 @@
 
     - name: include traefik
       import_tasks: include/traefik-helm.yml
+
+    - name: include MiniO
+      import_tasks: include/minio-helm.yml
+      when: applications.minio == true
 
     - name: include Argo CD
       import_tasks: include/argocd-helm.yml

@@ -15,6 +15,14 @@
       kind: Namespace
       state: present
 
+  - name: Create Login Credentials - Bad Practice must be replaced
+    shell: >
+      echo -n 'admin' > ./admin-user && \
+      < /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-20};echo > ./admin-password && \
+      kubectl create secret generic grafana-admin-credentials \
+      --from-file=./admin-user --from-file=admin-password -n monitoring && \
+      rm admin-user && rm admin-password
+
   - name: Deploy kube-prometheus-stack chart
     kubernetes.core.helm:
         name: kube-prometheus-stack

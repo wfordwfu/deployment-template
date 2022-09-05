@@ -1,0 +1,6 @@
+---
+minio_cli_version: '4.4.16'
+minio_cli_platform: 'linux'
+minio_cli_arch: 'amd64'
+minio_cli_repo_path: 'https://github.com/minio/operator'
+minio_cli_bin_path: '/usr/local/bin/kubectl-minio'

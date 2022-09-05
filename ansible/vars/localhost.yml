@@ -5,15 +5,17 @@
     ansible_cron_minute: "*/15"
 #    ssl_ca_cert: /etc/ssl/certs/ca-certificates.crt
 
-    roles:
+    incRoles:
       git: false
       helm: true
       kubectl: true
+      cmctl: true
       github: true
       golang: true
       rust: true
       k9s: true
       argocd_cli: true
+      minio_cli: true
       k3d: false
       oh_my_zsh: true
       vscode: true
@@ -21,4 +23,5 @@
     applications:
       airflow: false
       argocd: false
+      minio: false
       monitoring: false

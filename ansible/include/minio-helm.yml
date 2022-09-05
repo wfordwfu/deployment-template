@@ -1,0 +1,33 @@
+---
+  - name: Init MinIO Operator
+    command: kubectl minio init --namespace minio-operator
+
+  - name: Add MinIO repository
+    kubernetes.core.helm_repository:
+      name: minio
+      repo_url: https://operator.min.io/
+
+  - name: Helm Repo Update
+    command: helm repo update
+    changed_when: false
+
+  - name: Create MinIO namespace
+    kubernetes.core.k8s:
+      name: minio-tenant
+      api_version: v1
+      kind: Namespace
+      state: present
+
+  - name: Deploy MinIO chart
+    kubernetes.core.helm:
+        name: tenant
+        namespace: minio-tenant
+        chart_ref: minio/tenant
+        values_files: 
+          - include/helm/minio/tenant/values.yaml
+
+#  - name: Apply Yaml for MinIO
+#    kubernetes.core.k8s:
+#      definition: "{{ lookup('template', '{{ item }}') | from_yaml }}"
+#    with_fileglob:
+#      - "k8s/minio/*.yaml"

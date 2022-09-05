@@ -1,0 +1,53 @@
+---
+- name: Check if cmctl binary exists.
+  stat:
+    path: "{{ cmctl_bin_path }}"
+  register: cmctl_check
+
+- name: Check Latest cmctl release version.
+  shell: curl  "https://api.github.com/repos/cert-manager/cert-manager/tags" | jq -r '.[0].name'
+  failed_when: false
+  changed_when: false
+  register: cmctl_latest_version
+
+- name: Check for new stable version
+  debug:
+    msg: > 
+      - "A newer version of cmctl exists!""
+      - "Current target version is {{ cmctl_version }}.""
+      - "Latest stable version is {{ cmctl_latest_version.stdout }}."
+  when: >
+    not cmctl_check.stat.exists
+    or cmctl_version not in cmctl_latest_version.stdout
+- name: Check cmctl version.
+  command: "{{ cmctl_bin_path }} version | awk '{if(/Version:/) print $2}'"
+  failed_when: false
+  changed_when: false
+  register: cmctl_existing_version
+
+- name: Download cmctl tar
+  get_url:
+    url: "{{ cmctl_repo_path }}/releases/download/{{ cmctl_version }}/cmctl-{{ cmctl_platform }}-{{ cmctl_arch }}.tar.gz"
+    dest: /tmp
+    mode: 0755
+  register: cmctl_tar
+  when: >
+    not cmctl_check.stat.exists
+    or cmctl_version not in cmctl_existing_version.stdout
+- name: Unarchive cmctl
+  unarchive:
+    src: "/tmp/cmctl-{{ cmctl_platform }}-{{ cmctl_arch }}.tar.gz"
+    dest: /tmp
+    remote_src: yes
+    mode: 0755
+  register: cmctl_download
+  when: cmctl_tar is changed
+
+- name: Copy k9s binary into place.
+  copy:
+    src: "/tmp/cmctl"
+    dest: "{{ cmctl_bin_path }}"
+    mode: 0755
+    remote_src: true
+  become: true
+  when: cmctl_download is changed

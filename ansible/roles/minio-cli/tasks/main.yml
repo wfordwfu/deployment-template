@@ -1,0 +1,46 @@
+---
+- name: Check if minio_cli binary exists.
+  stat:
+    path: "{{ minio_cli_bin_path }}"
+  register: minio_cli_check
+
+- name: Check Latest minio_cli release version.
+  shell: curl  "https://api.github.com/repos/minio/operator/tags" | jq -r '.[0].name' | cut -c2-
+  failed_when: false
+  changed_when: false
+  register: minio_cli_latest_version
+
+- name: Check for new version
+  debug:
+    msg: > 
+      - "A newer version of minio_cli exists!"
+      - "Current target version is {{ minio_cli_version }}."
+      - "Latest stable version is {{ minio_cli_latest_version.stdout }}."
+  when: >
+    not minio_cli_check.stat.exists
+    or minio_cli_version not in minio_cli_latest_version.stdout
+
+- name: Check minio_cli version.
+  command: "kubectl minio version | cut -c2-"
+  failed_when: false
+  changed_when: false
+  register: minio_cli_existing_version
+
+- name: Download minio_cli binary
+  get_url:
+    url: "{{ minio_cli_repo_path }}/releases/download/v{{ minio_cli_version }}/kubectl-minio_{{ minio_cli_version }}_{{ minio_cli_platform }}_{{ minio_cli_arch }}"
+    dest: /tmp
+    mode: 0755
+  register: minio_cli_download
+  when: >
+    not minio_cli_check.stat.exists
+    or minio_cli_version not in minio_cli_existing_version.stdout
+
+- name: Copy minio_cli binary into place.
+  copy:
+    src: "/tmp/kubectl-minio_{{ minio_cli_version }}_{{ minio_cli_platform }}_{{ minio_cli_arch }}"
+    dest: "{{ minio_cli_bin_path }}"
+    mode: 0755
+    remote_src: true
+  become: true
+  when: minio_cli_download is changed
