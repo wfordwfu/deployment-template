@@ -1,0 +1,35 @@
+---
+- name: Check if Conda binary exists.
+  stat:
+    path: "{{ conda_bin_path }}"
+  register: conda_check
+
+#- name: Check Conda version.
+#  command: "{{ conda_bin_path }} --version | awk '{if(/conda/) print $2}'"
+#  failed_when: false
+#  changed_when: false
+#  register: conda_existing_version
+
+# https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+# https://repo.anaconda.com/miniconda/Miniconda3-py39_4.12.0-Linux-x86_64.sh
+- name: Download conda install script
+  get_url:
+    url: "{{ conda_repo_path }}/miniconda/Miniconda3-latest-{{ conda_platform }}-{{ conda_arch }}.sh"
+    dest: /tmp
+#   checksum: "sha256:{{ conda_checksum.content.split('  ')[0] }}"
+    mode: 0755
+  register: conda_download
+  when: >
+    not conda_check.stat.exists
+#    or conda_version not in conda_existing_version.stdout
+
+- name: Run conda installer
+  shell: |
+      /tmp/Miniconda3-latest-{{ conda_platform }}-{{ conda_arch }}.sh -b -u -m -p $HOME/.miniconda3 && \
+      $HOME/.miniconda3/bin/conda init zsh && \
+      source $HOME/.zshrc && \
+      {{ conda_bin_path }} config --add channels conda-forge
+  when: conda_download is changed
+
+- name: Update conda
+  command: "{{ conda_bin_path }} update -y conda"

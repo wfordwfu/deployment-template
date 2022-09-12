@@ -56,3 +56,7 @@
     remote_src: true
   become: true
   when: github_download is changed
+
+- name: create shell completion
+  shell: gh completion --shell zsh > $HOME/.config/zsh/completions/_gh
+  when: github_download is changed

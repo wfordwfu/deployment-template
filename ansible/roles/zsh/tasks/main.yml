@@ -1,0 +1,21 @@
+---
+- name: Install zsh
+  package:
+    name: zsh
+    state: latest
+  become: true
+
+#- name: Copy zshrc
+#  copy:
+#    src: files/zshrc
+#    dest: ~/.zshrc
+#    mode: 0644
+
+- name: Change Default Shell
+  shell: chsh -s $(which zsh)
+  become: true
+
+- name: Make Config directory
+  ansible.builtin.file:
+    path: $HOME/.config/zsh/completions
+    state: directory

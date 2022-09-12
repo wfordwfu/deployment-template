@@ -2,6 +2,8 @@
 - hosts: localhost
   connection: local
   gather_facts: true
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
 
   pre_tasks:
     #- include_vars: "ansible/vars/{{ lookup('env', 'HOSTNAME') }}.yml"
@@ -27,6 +29,10 @@
         state: present
       become: true
 
+    - name: implement zsh role
+      include_role:
+        name: zsh
+
     - name: implement helm role
       include_role:
         name: helm
@@ -41,6 +47,11 @@
       include_role:
         name: cmctl
       when: incRoles.cmctl == true
+
+    - name: implement Azure-cli role
+      include_role:
+        name: az-cli
+      when: incRoles.azcli == true
 
     - name: implement git role
       include_role:
@@ -76,6 +87,11 @@
       include_role:
         name: minio-cli
       when: incRoles.minio_cli == true
+
+    - name: install Miniconda
+      include_role:
+        name: miniconda
+      when: incRoles.miniconda == true
 
     - name: implement Oh My Zsh
       include_role:

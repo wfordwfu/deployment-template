@@ -1,6 +1,6 @@
 ---
 # Configs
-    ansible_python_interpreter: /usr/bin/env python3
+    ansible_python_interpreter: /usr/bin/python3
     branch: main
     ansible_cron_minute: "*/15"
 #    ssl_ca_cert: /etc/ssl/certs/ca-certificates.crt
@@ -10,14 +10,16 @@
       helm: true
       kubectl: true
       cmctl: true
+      azcli: false
       github: true
       golang: true
       rust: true
       k9s: true
       argocd_cli: true
       minio_cli: true
+      miniconda: true
       k3d: false
-      oh_my_zsh: true
+      oh_my_zsh: false
       vscode: true
     
     applications:

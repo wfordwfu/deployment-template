@@ -1,7 +1,26 @@
 ---
 title: Deployment Project Template
-last revised: 2022/09/05
+last revised: 2022/09/11
 ---
+
+- [Project Status - in development](#project-status---in-development)
+  - [Ansible vs Terraform](#ansible-vs-terraform)
+- [Features](#features)
+- [Getting Started](#getting-started)
+  - [Configure Rancher Desktop and WSL(including gh-cli and ansible):](#configure-rancher-desktop-and-wslincluding-gh-cli-and-ansible)
+  - [Clone this repo](#clone-this-repo)
+  - [To deploy locally](#to-deploy-locally)
+  - [To reset your environment](#to-reset-your-environment)
+- [Notes](#notes)
+  - [Useful commands](#useful-commands)
+  - [Traefik/Lets Encrypt notes](#traefiklets-encrypt-notes)
+  - [Multiple kubectx](#multiple-kubectx)
+  - [dynamic nfs provisioning - Expect to replace with Longhorn](#dynamic-nfs-provisioning---expect-to-replace-with-longhorn)
+- [Reference](#reference)
+  - [Tooling](#tooling)
+  - [Deployment Features](#deployment-features)
+  - [Helm Charts](#helm-charts)
+  - [To Add](#to-add)
 
 ## Project Status - in development
 
@@ -27,7 +46,7 @@ NOTE: Currently there's a bug in WSL2 that affects devcontainers.  Terraform is 
 
 Currently the dev environment (Ubuntu) installs several things via Ansible script:
 
-- shell, languages or cli tools (gh, ansible, k9s, Go, Rust, argocd-cli, Oh My Zsh, k3d, cmctl, minio-cli)
+- shell, languages or cli tools (gh, ansible, k9s, Go, Rust, Conda, argocd-cli, Oh My Zsh, k3d, cmctl, minio-cli)
 - Visual Studio Code extensions
 - Helm charts via the local ansible script (Helm, Traefik, Cert-Manager, ArgoCD, Grafana/Prometheus, Airflow)
 
@@ -150,6 +169,8 @@ persistence:
 - [GitHub Actions Azure Login](https://github.com/marketplace/actions/azure-login)
 - [K9s](https://k9scli.io/)
 - [kubectx](https://github.com/ahmetb/kubectx)
+- [Miniconda](https://conda.io/en/latest/miniconda.htm)
+- [ZSH](https://zsh.sourceforge.io/FAQ/)
 
 ### Deployment Features
 

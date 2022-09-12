@@ -1,0 +1,8 @@
+---
+# https://docs.conda.io/en/latest/miniconda.html to update sha
+conda_version: '4.12.0'
+conda_platform: Linux
+conda_arch: x86_64
+conda_checksum: 78f39f9bae971ec1ae7969f0516017f2413f17796670f7040725dd83fcff5689
+conda_repo_path: "https://repo.anaconda.com"
+conda_bin_path: $HOME/.miniconda3/bin/conda
