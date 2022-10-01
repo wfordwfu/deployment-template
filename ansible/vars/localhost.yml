@@ -9,6 +9,7 @@
       git: false
       helm: true
       kubectl: true
+      kustomize: true
       cmctl: true
       azcli: false
       github: true

@@ -43,6 +43,11 @@
         name: kubectl
       when: incRoles.kubectl == true
 
+    - name: implement kustomize role
+      include_role:
+        name: kustomize
+      when: incRoles.kustomize == true
+
     - name: implement cmctl role
       include_role:
         name: cmctl

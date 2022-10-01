@@ -1,0 +1,8 @@
+---
+kustomize_version: 'v4.5.7'
+kustomize_platform: linux
+kustomize_arch: amd64
+
+kustomize_repo_path: "https://github.com/kubernetes-sigs/kustomize"
+
+kustomize_bin_path: /usr/local/bin/kustomize

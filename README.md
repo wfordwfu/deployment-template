@@ -1,6 +1,6 @@
 ---
 title: Deployment Project Template
-last revised: 2022/09/11
+last revised: 2022/10/01
 ---
 
 - [Project Status - in development](#project-status---in-development)
@@ -46,7 +46,7 @@ NOTE: Currently there's a bug in WSL2 that affects devcontainers.  Terraform is 
 
 Currently the dev environment (Ubuntu) installs several things via Ansible script:
 
-- shell, languages or cli tools (gh, ansible, k9s, Go, Rust, Conda, argocd-cli, Oh My Zsh, k3d, cmctl, minio-cli)
+- shell, languages or cli tools (gh, ansible, k9s, Go, Rust, Conda, argocd-cli, Oh My Zsh, k3d, cmctl, minio-cli, kustomize)
 - Visual Studio Code extensions
 - Helm charts via the local ansible script (Helm, Traefik, Cert-Manager, ArgoCD, Grafana/Prometheus, Airflow)
 

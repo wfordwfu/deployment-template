@@ -1,0 +1,56 @@
+---
+- name: Check if kustomize binary exists.
+  stat:
+    path: "{{ kustomize_bin_path }}"
+  register: kustomize_check
+
+# TODO: figure out command to get latest version- this repo has lots of different packages in releases
+# possibly check out https://api.github.com/repos/kubernetes-sigs/kustomize/releases
+#- name: Check Latest kustomize release version.
+#  shell: curl  "https://api.github.com/repos/kubernetes-sigs/kustomize/tags" | jq -r '.[0].name'
+#  failed_when: false
+#  changed_when: false
+#  register: kustomize_latest_version
+#
+#- name: Check for new stable version
+#  debug:
+#    msg: > 
+#      - "A newer version of kustomize exists!""
+#      - "Current target version is {{ kustomize_version }}.""
+#      - "Latest stable version is {{ kustomize_latest_version.stdout }}."
+#  when: >
+#    not kustomize_check.stat.exists
+#    or kustomize_version not in cmctl_latest_version.stdout
+
+- name: Check kustomize version.
+  command: "{{ kustomize_bin_path }} version --short | cut -d\/ -f2 | cut -d\  -f1"
+  failed_when: false
+  changed_when: false
+  register: kustomize_existing_version
+
+- name: Download kustomize tar
+  get_url:
+    url: "{{ kustomize_repo_path }}/releases/download/kustomize%2F{{ kustomize_version }}/kustomize_{{ kustomize_version }}_{{ kustomize_platform }}_{{ kustomize_arch }}.tar.gz"
+    dest: /tmp
+    mode: 0755
+  register: kustomize_tar
+  when: >
+    not kustomize_check.stat.exists
+    or kustomize_version not in kustomize_existing_version.stdout
+- name: Unarchive kustomize
+  unarchive:
+    src: "/tmp/kustomize_{{ kustomize_version }}_{{ kustomize_platform }}_{{ kustomize_arch }}.tar.gz"
+    dest: /tmp
+    remote_src: yes
+    mode: 0755
+  register: kustomize_download
+  when: kustomize_tar is changed
+
+- name: Copy kustomize binary into place.
+  copy:
+    src: "/tmp/kustomize"
+    dest: "{{ kustomize_bin_path }}"
+    mode: 0755
+    remote_src: true
+  become: true
+  when: kustomize_download is changed
