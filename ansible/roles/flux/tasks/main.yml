@@ -1,0 +1,59 @@
+---
+- name: Check if flux_cli binary exists.
+  stat:
+    path: "{{ flux_cli_bin_path }}"
+  register: flux_cli_check
+
+- name: Check Latest flux_cli release version.
+  shell: curl  "https://api.github.com/repos/fluxcd/flux2/tags" | jq -r '.[0].name' | cut -d v -f 2
+  failed_when: false
+  changed_when: false
+  register: flux_cli_latest_version
+
+- name: Check for new version
+  debug:
+    msg: > 
+      - "A newer version of flux_cli exists!""
+      - "Current target version is {{ flux_cli_version }}.""
+      - "Latest stable version is {{ flux_cli_latest_version.stdout }}."
+  when: >
+    not flux_cli_check.stat.exists
+    or flux_cli_version not in flux_cli_latest_version.stdout
+
+- name: Check flux_cli version.
+  command: "{{ flux_cli_bin_path }} --version | awk '{if(/flux version/) print $3}'"
+  failed_when: false
+  changed_when: false
+  register: flux_cli_existing_version
+
+- name: Download flux_cli tar
+  get_url:
+    url: "{{ flux_cli_repo_path }}/releases/download/v{{ flux_cli_version }}/flux_{{ flux_cli_version }}_{{ flux_cli_platform }}_{{ flux_cli_arch }}.tar.gz"
+    dest: /tmp
+    checksum: "sha256:{{ flux_cli_repo_path }}/releases/download/v{{ flux_cli_version }}/flux_{{ flux_cli_version }}_checksums.txt"
+    mode: 0755
+  register: flux_cli_tar
+  when: >
+    not flux_cli_check.stat.exists
+    or flux_cli_version not in flux_cli_existing_version.stdout
+
+- name: Unarchive flux_cli
+  unarchive:
+    src: "/tmp/flux_{{ flux_cli_version }}_{{ flux_cli_platform }}_{{ flux_cli_arch }}.tar.gz"
+    dest: /tmp
+    remote_src: yes
+    mode: 0755
+  register: flux_cli_download
+  when: flux_cli_tar is changed
+
+- name: Copy flux_cli binary into place.
+  copy:
+    src: "/tmp/flux"
+    dest: "{{ flux_cli_bin_path }}"
+    mode: 0755
+    remote_src: true
+  become: true
+  when: flux_cli_download is changed
+
+#Install Flux application
+# kubectl apply -f https://github.com/fluxcd/flux2/releases/latest/download/install.yaml

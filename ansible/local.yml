@@ -53,6 +53,11 @@
         name: cmctl
       when: incRoles.cmctl == true
 
+    - name: implement flux role
+      include_role:
+        name: flux
+      when: incRoles.flux == true
+
     - name: implement Azure-cli role
       include_role:
         name: az-cli

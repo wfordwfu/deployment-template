@@ -1,6 +1,6 @@
 ---
 title: Deployment Project Template
-last revised: 2022/10/01
+last revised: 2022/10/16
 ---
 
 - [Project Status - in development](#project-status---in-development)
@@ -21,6 +21,7 @@ last revised: 2022/10/01
   - [Deployment Features](#deployment-features)
   - [Helm Charts](#helm-charts)
   - [To Add](#to-add)
+- [Notes argo cd](#notes-argo-cd)
 
 ## Project Status - in development
 
@@ -46,7 +47,7 @@ NOTE: Currently there's a bug in WSL2 that affects devcontainers.  Terraform is 
 
 Currently the dev environment (Ubuntu) installs several things via Ansible script:
 
-- shell, languages or cli tools (gh, ansible, k9s, Go, Rust, Conda, argocd-cli, Oh My Zsh, k3d, cmctl, minio-cli, kustomize)
+- shell, languages or cli tools (gh, ansible, k9s, Go, Rust, Conda, argocd-cli, flux-cli, Oh My Zsh, k3d, cmctl, minio-cli, kustomize)
 - Visual Studio Code extensions
 - Helm charts via the local ansible script (Helm, Traefik, Cert-Manager, ArgoCD, Grafana/Prometheus, Airflow)
 
@@ -104,6 +105,8 @@ To deploy locally, run `ansible-playbook ansible/local.yml -K`.  The roles/appli
 ### Useful commands
 
 - `helm show values traefik/traefik > temp/traefik-values.yaml`
+- `kubectl config get-contexts -o name`
+- `kubectl config use-context rancher-desktop`
 
 ### Traefik/Lets Encrypt notes
 
@@ -179,6 +182,7 @@ persistence:
 - [Argo CD](https://argoproj.github.io/cd)
 - [Argo CD docs](https://argo-cd.readthedocs.io/en/stable/)
 - [Argo CD Cli](https://argo-cd.readthedocs.io/en/stable/cli_installation/)
+- [Flux CD](https://fluxcd.io/)
 - [MinIO for Kubernetes](https://min.io/product/kubernetes)
 - [Kubectl Krew plugin manager](https://krew.sigs.k8s.io/docs/user-guide/quickstart/)
 - [Krew plugins list](https://krew.sigs.k8s.io/plugins/)
@@ -206,3 +210,9 @@ persistence:
 - [Kubescape](https://github.com/armosec/kubescape)
 - [Synk GH Actions](https://github.com/marketplace/actions/snyk)
 - [How to Run minio with traefik](https://docs.min.io/docs/how-to-run-multiple-minio-servers-with-traef-k.html)
+
+## Notes argo cd
+
+- https://github.com/argoproj/argo-cd/blob/master/manifests/install.yaml
+- https://argo-cd.readthedocs.io/en/stable/operator-manual/application.yaml
+- https://github.com/argoproj/argoproj-deployments/tree/master/argocd

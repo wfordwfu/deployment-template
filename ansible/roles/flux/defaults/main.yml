@@ -1,0 +1,7 @@
+---
+flux_cli_version: '0.35.0'
+flux_cli_platform: linux
+flux_cli_arch: amd64
+
+flux_cli_repo_path: "https://github.com/fluxcd/flux2"
+flux_cli_bin_path: /usr/local/bin/flux

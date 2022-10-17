@@ -16,9 +16,10 @@
       golang: true
       rust: true
       k9s: true
-      argocd_cli: true
+      argocd_cli: false
+      flux: true
       minio_cli: true
-      miniconda: true
+      miniconda: false
       k3d: false
       oh_my_zsh: false
       vscode: true
