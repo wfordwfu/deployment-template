@@ -2,13 +2,14 @@
 // https://github.com/microsoft/vscode-dev-containers/tree/v0.224.2/containers/ubuntu
 {
 	"name": "Deployment Control",
-	"build": {
-		"dockerfile": "Dockerfile",
-        "context": ".",
+    "image": "ghcr.io/wfordwfu/deployment-template:latest",
+	//"build": {
+	//	"dockerfile": "Dockerfile",
+    //   "context": ".",
 		// Update 'VARIANT' to pick an Ubuntu version: hirsute, focal, bionic
 		// Use hirsute or bionic on local arm64/Apple Silicon.
-		"args": { "VARIANT": "bullseye" }
-	},
+	//	"args": { "VARIANT": "bullseye" }
+	//},
     "customizations": {
                     "vscode": {
                         // Set *default* container specific settings.json values on container create.
@@ -49,6 +50,7 @@
                             "oderwat.indent-rainbow",
                             "mutantdino.resourcemonitor",
                             "ms-vscode.azurecli",
+                            "ms-azuretools.vscode-docker",
                             "ms-kubernetes-tools.vscode-kubernetes-tools",
                             "ms-toolsai.jupyter",
                             "ms-python.python",
@@ -61,13 +63,12 @@
     //To provide access to local k8s instance
     "mounts": [
         "source=/var/run/docker.sock,target=/var/run/docker-host.sock,type=bind",
-        "source=${env:HOME}${env:USERPROFILE}/.kube,target=/root/.kube,type=bind"
+        //"source=${env:HOME}${env:USERPROFILE}/.kube,target=/root/.kube,type=bind"
+        "source=${env:HOME}${env:USERPROFILE}/.kube,target=/usr/local/share/kube-localhost,type=bind"
     ],
     "remoteEnv": {
         "SYNC_LOCALHOST_KUBECONFIG": "true"
     },
-
-
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
@@ -78,60 +79,60 @@
     "postStartCommand": "bash .devcontainer/postStartCommand.sh",
 
 	// Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
-	//"remoteUser": "vscode",
+	"remoteUser": "vscode",
 
     // Features provided by VS Code that are being installed.  
     // More info: https://github.com/microsoft/vscode-dev-containers/tree/main/script-library/container-features.
 	"features": {
-        "common": {
-            //https://github.com/microsoft/vscode-dev-containers/blob/main/script-library/docs/common.md
-            "username": "automatic",
-            "uid": "automatic",
-            "gid": "automatic",
-            "installZsh": true,
-            "installOhMyZsh": true,
-            "upgradePackages": true,
-            "nonFreePackages": false
-        },
-        "git": {
-            //https://github.com/microsoft/vscode-dev-containers/blob/main/script-library/docs/git-from-src.md
-            "version": "latest",
-            "ppa": true
-        },
-        "golang":{
-            //https://github.com/microsoft/vscode-dev-containers/blob/main/script-library/docs/go.md
-            "version": "latest"
-        },
-		"kubectl-helm-minikube": {
-            //https://github.com/microsoft/vscode-dev-containers/blob/main/script-library/docs/kubectl-helm.md
-            "version": "latest",
-            "helm": "latest",
-            "minikube": "none"
-        },
-		"terraform": {
-            //https://github.com/microsoft/vscode-dev-containers/blob/main/script-library/docs/terraform.md
-            "version":"latest",
-            "tflint": "latest",
-            "terragrunt": "latest"
-        },
-		"github-cli": {
-            //https://github.com/microsoft/vscode-dev-containers/blob/main/script-library/docs/github-cli.md
-            "version":"latest"
-        },
-		"azure-cli":  {
-            //https://github.com/microsoft/vscode-dev-containers/blob/main/script-library/docs/azcli.md
-            "version":"latest"
-        },
-        "aws-cli": "latest",
-		"python": {
-            //https://github.com/microsoft/vscode-dev-containers/blob/main/script-library/docs/python.md
-            "version": "3.10"
-        },
-		"rust": {
-            //https://github.com/microsoft/vscode-dev-containers/blob/main/script-library/docs/rust.md
-            "version":"latest",
-            "profile":"default"
-        }
+//        "common": {
+//            //https://github.com/microsoft/vscode-dev-containers/blob/main/script-library/docs/common.md
+//            "username": "automatic",
+//            "uid": "automatic",
+//            "gid": "automatic",
+//            "installZsh": true,
+//            "installOhMyZsh": true,
+//            "upgradePackages": true,
+//            "nonFreePackages": false
+//        },
+//        "git": {
+//            //https://github.com/microsoft/vscode-dev-containers/blob/main/script-library/docs/git-from-src.md
+//            "version": "latest",
+//            "ppa": true
+//        },
+//        "golang":{
+//            //https://github.com/microsoft/vscode-dev-containers/blob/main/script-library/docs/go.md
+//            "version": "latest"
+//        },
+//		"kubectl-helm-minikube": {
+//            //https://github.com/microsoft/vscode-dev-containers/blob/main/script-library/docs/kubectl-helm.md
+//            "version": "latest",
+//            "helm": "latest",
+//            "minikube": "none"
+//        },
+//		"terraform": {
+//            //https://github.com/microsoft/vscode-dev-containers/blob/main/script-library/docs/terraform.md
+//            "version":"latest",
+//            "tflint": "latest",
+//            "terragrunt": "latest"
+//        },
+//		"github-cli": {
+//            //https://github.com/microsoft/vscode-dev-containers/blob/main/script-library/docs/github-cli.md
+//            "version":"latest"
+//        },
+//		"azure-cli":  {
+//            //https://github.com/microsoft/vscode-dev-containers/blob/main/script-library/docs/azcli.md
+//            "version":"latest"
+//        },
+//        "aws-cli": "latest",
+//		"python": {
+//            //https://github.com/microsoft/vscode-dev-containers/blob/main/script-library/docs/python.md
+//            "version": "3.10"
+//        },
+//		"rust": {
+//            //https://github.com/microsoft/vscode-dev-containers/blob/main/script-library/docs/rust.md
+//            "version":"latest",
+//            "profile":"default"
+//        }
 	},
     "runArgs": ["--init"]
 }
