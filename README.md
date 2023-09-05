@@ -1,11 +1,12 @@
 ---
 title: Deployment Project Template
-last revised: 2022/10/16
+last revised: 2023/08/27
 ---
 
 - [Project Status - in development](#project-status---in-development)
-  - [Ansible vs Terraform](#ansible-vs-terraform)
+- [Simplify (Reducing dependencies)](#simplify-reducing-dependencies)
 - [Features](#features)
+  - [Devcontainer](#devcontainer)
 - [Getting Started](#getting-started)
   - [Configure Rancher Desktop and WSL(including gh-cli and ansible):](#configure-rancher-desktop-and-wslincluding-gh-cli-and-ansible)
   - [Clone this repo](#clone-this-repo)
@@ -22,6 +23,8 @@ last revised: 2022/10/16
   - [Helm Charts](#helm-charts)
   - [To Add](#to-add)
 - [Notes argo cd](#notes-argo-cd)
+- [Make notes](#make-notes)
+
 
 ## Project Status - in development
 
@@ -37,21 +40,13 @@ It's the re-building that has me the most excited.  The problem that I've been t
 
 So the steps you'll need to get going are something like below.  If different OS, you can probably get through this okay, but this approach needs some tweaking.  I like WSL2 as a solution because it's isolated from the main OS - can recreate if something goes south.  Linux and Mac may want to stick with the devcontainer idea or something else that provides a degree of isolation from the OS - QEMU, LXC or KVM.  I've left the devcontainer logic in place but I'm not improving/maintaining it at present.
 
-### Ansible vs Terraform
 
-I started building out example terraform and ansible-pull projects in this repo.  I'm not sure where I'm going to go with those, but I was thinking through which tools I'd use for this solution.  At first I was thinking Terraform, and ultimately I may change my mind, but I think it's far more interesting to use Crossplane.  The downside to crossplane is that in a local situation, it requires a bit more effort to stand up an environment, so I decided Ansible was reasonable to handle that task.
+## Simplify (Reducing dependencies)
 
-NOTE: Currently there's a bug in WSL2 that affects devcontainers.  Terraform is impacted.  before running terraform commands vim into /etc/resolve.conf and set the nameserver to 1.1.1.1 or 8.8.8.8, something like that.  This is just a workaround, so I'm not going to update the files to automatically fix. --[Github issue](https://github.com/microsoft/WSL/issues/8022)
+I'm in the process of simplifying this repo.  Rather than using Ansible to configure the utilities and then deploying all the applications, I'm using my dotfiles to install cli tools, and then I'm going to start working to remove dependencies where it makes sense.
+
 
 ## Features
-
-Currently the dev environment (Ubuntu) installs several things via Ansible script:
-
-- shell, languages or cli tools (gh, ansible, k9s, Go, Rust, Conda, argocd-cli, flux-cli, Oh My Zsh, k3d, cmctl, minio-cli, kustomize)
-- Visual Studio Code extensions
-- Helm charts via the local ansible script (Helm, Traefik, Cert-Manager, ArgoCD, Grafana/Prometheus, Airflow)
-
-The specific features selected can be tweaked via `ansible/vars/localhost.yml`.  My plans are to add back some additional features that were included in the devcontainer solution (gcloud-cli, azure-cli, aws-cli, terraform). I still need to add additional configurations to Oh My Zsh.  If you have immediate need of these, some links to well done scripts can be found in the devcontainer section.  My plans are to create/recreate the same idea within ansible roles to be consistent.
 
 - To access [traefik dashboard](http://dashboard.traefik.127.0.0.1.sslip.io)
 - To access [argocd UI](http://argocd.127.0.0.1.sslip.io):
@@ -64,9 +59,23 @@ The specific features selected can be tweaked via `ansible/vars/localhost.yml`. 
   - Username is admin
   - Password is `kubectl -n monitoring get secret grafana-admin-credentials -o jsonpath="{.data.password}" | base64 -d; echo`
 
+
+### Devcontainer
+
+Currently the devcontainer installs several things via Ansible script:
+
+- shell, languages or cli tools (gh, ansible, k9s, Go, Rust, Conda, argocd-cli, flux-cli, Oh My Zsh, k3d, cmctl, minio-cli, kustomize)
+- Visual Studio Code extensions
+- Helm charts via the local ansible script (Helm, Traefik, Cert-Manager, ArgoCD, Grafana/Prometheus, Airflow)
+
+The specific features selected can be tweaked via `ansible/vars/localhost.yml`.  My plans are to add back some additional features that were included in the devcontainer solution (gcloud-cli, azure-cli, aws-cli, terraform). I still need to add additional configurations to Oh My Zsh.  If you have immediate need of these, some links to well done scripts can be found in the devcontainer section.  My plans are to create/recreate the same idea within ansible roles to be consistent.
+
+
 ## Getting Started
 
 ### Configure Rancher Desktop and WSL(including gh-cli and ansible):
+
+TODO: This needs to be reviewed.
 
 1. Enable Virtualization in BIOS
 2. [Install Rancher Desktop](https://docs.rancherdesktop.io/getting-started/installation) - I believe this will prompts enabling WSL in Windows, but if not...
@@ -216,3 +225,7 @@ persistence:
 - https://github.com/argoproj/argo-cd/blob/master/manifests/install.yaml
 - https://argo-cd.readthedocs.io/en/stable/operator-manual/application.yaml
 - https://github.com/argoproj/argoproj-deployments/tree/master/argocd
+
+## Make notes
+
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/$(ARGOCD_VERSION)/manifests/install.yaml

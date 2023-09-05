@@ -1,0 +1,17 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: argo-server
+  namespace: argocd
+spec:
+  entryPoints:
+  - web
+  routes:
+  - kind: Rule
+    match: Host("argocd.127.0.0.1.sslip.io")
+    services:
+    - name: argocd-server-server
+      port: 80
+    middlewares:
+    - name: redirect-permanent

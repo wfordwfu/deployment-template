@@ -1,0 +1,14 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: argocd-dashboard
+  namespace: argocd
+spec:
+  dnsNames:
+  - 'argocd.127.0.0.1.sslip.io'
+
+  issuerRef:
+    kind: ClusterIssuer
+    name: selfsigned
+  secretName: argocd-crt

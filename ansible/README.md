@@ -1,0 +1,1 @@
+I'm in the process of migrating the deployments from this folder into my dotfiles and the main deployment template, removing ansible as a dependency.
